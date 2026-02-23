@@ -1,0 +1,232 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Developed by Allons Mazani-->
+    <base href="/static/">
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>SupplyInsight</title>
+    <!-- plugins:css -->
+    <link rel="stylesheet" href="{% static 'assets/vendors/feather/feather.css' %}" />
+    <link
+      rel="stylesheet"
+      href="{% static 'assets/vendors/mdi/css/materialdesignicons.min.css' %}"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static 'assets/vendors/ti-icons/css/themify-icons.css' %}"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static 'assets/vendors/font-awesome/css/font-awesome.min.css' %}"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static 'assets/vendors/typicons/typicons.css' %}"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static 'assets/vendors/simple-line-icons/css/simple-line-icons.css' %}"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static 'assets/vendors/css/vendor.bundle.base.css' %}"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static 'assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css' %}"
+    />
+    <!-- endinject -->
+    <!-- Plugin css for this page -->
+    <!-- End plugin css for this page -->
+    <!-- inject:css -->
+    <link
+      rel="stylesheet"
+      href="{% static 'assets/css/vertical-layout-light/style.css' %}"
+    />
+    <!-- endinject -->
+    <link rel="shortcut icon" href="{% static 'assets/images/favicon.png' %}" />
+
+    <style>
+      .input-group {
+        height: 56px; /* matches form-control-lg in most admin themes */
+      }
+
+      .input-group-text,
+      .form-control {
+        height: 100%;
+      }
+
+      .input-group-text {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .input-group-text i {
+        font-size: 1.25rem;
+      }
+    </style>
+  </head>
+
+  <body class="sidebar-icon-only">
+    <div class="container-scroller">
+      <div class="container-fluid page-body-wrapper full-page-wrapper">
+        <div
+          class="content-wrapper d-flex align-items-stretch auth auth-img-bg"
+        >
+          <div class="row flex-grow">
+            <div
+              class="col-lg-6 d-flex align-items-center justify-content-center"
+            >
+              <div class="auth-form-transparent text-left p-3">
+                <div class="brand-logo">
+                  <img
+                    src="{% static 'assets/images/logo.png' %}"
+                    alt="logo"
+                    style="height: 200px; width: auto"
+                  />
+                </div>
+
+                <h4>Welcome back!</h4>
+                <h6 class="fw-light">Happy to see you again!</h6>
+
+                <form class="pt-3" method="post" action="{% url 'login' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">
+                  {% csrf_token %}
+                  {% if request.GET.next %}
+                    <input type="hidden" name="next" value="{{ request.GET.next }}" />
+                  {% endif %}
+                  <!-- Username/Email -->
+                  <div class="form-group">
+                    <label>Username or Email</label>
+
+                    <div class="input-group align-items-stretch">
+                      <span
+                        class="input-group-text bg-transparent d-flex align-items-center"
+                      >
+                        <i class="ti-user text-primary"></i>
+                      </span>
+
+                      <input
+                        type="text"
+                        name="identifier"
+                        class="form-control form-control-lg"
+                        placeholder="Username or Email"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <!-- Password -->
+                  <div class="form-group mt-3">
+                    <label>Password</label>
+
+                    <div class="input-group align-items-stretch">
+                      <span
+                        class="input-group-text bg-transparent d-flex align-items-center"
+                      >
+                        <i class="ti-lock text-primary"></i>
+                      </span>
+
+                      <input
+                        type="password"
+                        name="password"
+                        class="form-control form-control-lg"
+                        placeholder="Password"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <!-- Options -->
+                  <div
+                    class="my-3 d-flex justify-content-between align-items-center"
+                  >
+                    <div class="form-check">
+                      <label class="form-check-label text-muted">
+                        <input type="checkbox" class="form-check-input" style="border: 5px solid #000;"   />
+                        Keep me signed in
+                      </label>
+                    </div>
+                    <a href="#" class="auth-link text-black"
+                      >Forgot password?</a
+                    >
+                  </div>
+
+                  <!-- Button -->
+                  <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg fw-medium">
+                      LOGIN
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+            <div class="col-lg-6 login-half-bg d-flex flex-row">
+              <p
+                class="text-white fw-medium text-center flex-grow align-self-end"
+              >
+                Copyright &copy; 2026 All Rights Reserved.
+              </p>
+            </div>
+          </div>
+        </div>
+        <!-- content-wrapper ends -->
+      </div>
+      <!-- page-body-wrapper ends -->
+    </div>
+    <!-- container-scroller -->
+    <!-- plugins:js -->
+    <script src="{% static 'assets/vendors/js/vendor.bundle.base.js' %}"></script>
+    <script src="{% static 'assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js' %}"></script>
+    <!-- endinject -->
+    <!-- Plugin js for this page -->
+    <!-- End plugin js for this page -->
+    <!-- inject:js -->
+    <script src="{% static 'assets/js/off-canvas.js' %}"></script>
+    <script src="{% static 'assets/js/hoverable-collapse.js' %}"></script>
+    <script src="{% static 'assets/js/template.js' %}"></script>
+    <script src="{% static 'assets/js/settings.js' %}"></script>
+    <script src="{% static 'assets/js/todolist.js' %}"></script>
+    <!-- endinject -->
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    {% if messages %}
+      <div id="swal-messages-container" style="display: none;">
+        {% for message in messages %}
+          <div
+            class="swal-message"
+            data-icon="{% if 'error' in message.tags %}error{% elif 'warning' in message.tags %}warning{% elif 'success' in message.tags %}success{% else %}info{% endif %}"
+            data-title="{{ message|escapejs }}"
+          ></div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var container = document.getElementById("swal-messages-container");
+        if (!container) return;
+
+        var messages = container.querySelectorAll(".swal-message");
+        messages.forEach(function (el) {
+          Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: el.dataset.icon,
+            title: el.dataset.title,
+            showConfirmButton: false,
+            timer: 4000,
+            timerProgressBar: true
+          });
+        });
+      });
+    </script>
+  </body>
+
+  <!-- Mirrored from demo.bootstrapdash.com/star-admin-2-pro/themes/vertical-icon-menu/pages/samples/login-2.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 13 Jan 2026 10:22:26 GMT -->
+</html>

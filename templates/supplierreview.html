@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Supplier Review</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Supplier Review</h4>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">Supplier</label>
+                    <select class="form-select" name="supplier" required>
+                        <option value="">Select Supplier</option>
+                        {% for supplier in suppliers %}
+                            <option value="{{ supplier.id }}">{{ supplier.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Communication Score (0-10)</label>
+                        <input type="number" class="form-control" name="communication_score" min="0" max="10">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Flexibility Score (0-10)</label>
+                        <input type="number" class="form-control" name="flexibility_score" min="0" max="10">
+                    </div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Documentation Score (0-10)</label>
+                        <input type="number" class="form-control" name="documentation_score" min="0" max="10">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Pricing Score (0-10)</label>
+                        <input type="number" class="form-control" name="pricing_score" min="0" max="10">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Review Comment</label>
+                    <textarea class="form-control" name="review_comment" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Submit Review</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

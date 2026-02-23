@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Record Delivery</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Record Supplier Delivery</h4>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">Supplier</label>
+                    <select class="form-select" name="supplier" required>
+                        <option value="">Select Supplier</option>
+                        {% for supplier in suppliers %}
+                            <option value="{{ supplier.id }}">{{ supplier.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Order Number</label>
+                        <input type="text" class="form-control" name="order_number">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Invoice Number</label>
+                        <input type="text" class="form-control" name="invoice_number">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Product Category</label>
+                    <input type="text" class="form-control" name="product_category">
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Quantity Ordered</label>
+                        <input type="number" class="form-control" name="quantity_ordered" min="0">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Quantity Delivered</label>
+                        <input type="number" class="form-control" name="quantity_delivered" min="0">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Delivery Status</label>
+                    <input type="text" class="form-control" name="delivery_status">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Condition Status</label>
+                    <input type="text" class="form-control" name="condition_status">
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Vehicle Registration</label>
+                        <input type="text" class="form-control" name="vehicle_registration">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Driver Name</label>
+                        <input type="text" class="form-control" name="driver_name">
+                    </div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Expected Delivery Date</label>
+                        <input type="date" class="form-control" name="expected_delivery_date">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Actual Delivery Date</label>
+                        <input type="date" class="form-control" name="actual_delivery_date">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Delivery Comment</label>
+                    <textarea class="form-control" name="delivery_comment" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Record Delivery</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

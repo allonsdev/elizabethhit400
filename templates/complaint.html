@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Supplier Complaint</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Record Supplier Complaint</h4>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">Supplier</label>
+                    <select class="form-select" name="supplier" required>
+                        <option value="">Select Supplier</option>
+                        {% for supplier in suppliers %}
+                            <option value="{{ supplier.id }}">{{ supplier.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Complaint Description</label>
+                    <textarea class="form-control" name="description" rows="4" placeholder="Describe the issue..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Record Complaint</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

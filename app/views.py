@@ -33,6 +33,183 @@ from django.db.models import Avg, Count
 from .models import *
 
 
+# views.py
+
+from django.shortcuts import render
+from django.db.models import (
+    Count, Avg, Sum, F, Q, FloatField, ExpressionWrapper
+)
+from django.db.models.functions import Coalesce
+from django.utils import timezone
+from datetime import timedelta
+
+from .models import (
+    VisitorLog, Supplier, Delivery, Complaint,
+    SupplierPerformanceScore, InventoryItem,
+    Customer, Review, SentimentAnalysis,
+    MarketTrend
+)
+
+
+def admin_dashboard(request):
+    now = timezone.now()
+    last_30_days = now - timedelta(days=30)
+
+    # =====================================
+    # PLATFORM ANALYTICS
+    # =====================================
+    logs = VisitorLog.objects.filter(visited_at__gte=last_30_days)
+
+    page_views = logs.count()
+    unique_visitors = logs.values("ip_address").distinct().count()
+
+    bounce_ips = (
+        logs.values("ip_address")
+        .annotate(count=Count("id"))
+        .filter(count=1)
+        .count()
+    )
+
+    bounce_rate = (bounce_ips / unique_visitors * 100) if unique_visitors else 0
+
+    # =====================================
+    # SUPPLIER ANALYTICS
+    # =====================================
+    total_suppliers = Supplier.objects.count()
+    active_suppliers = Supplier.objects.filter(is_active=True).count()
+
+    avg_supplier_score = SupplierPerformanceScore.objects.aggregate(
+        avg=Avg("final_score")
+    )["avg"] or 0
+
+    high_risk_suppliers = SupplierPerformanceScore.objects.filter(
+        risk_index__gt=70
+    ).count()
+
+    # =====================================
+    # DELIVERY ANALYTICS
+    # =====================================
+    total_deliveries = Delivery.objects.count()
+
+    on_time_rate = (
+        Delivery.objects.filter(delivery_status="ON_TIME").count()
+        / total_deliveries * 100
+    ) if total_deliveries else 0
+
+    damaged_rate = (
+        Delivery.objects.filter(condition_status="DAMAGED").count()
+        / total_deliveries * 100
+    ) if total_deliveries else 0
+
+    # =====================================
+    # COMPLAINT ANALYTICS
+    # =====================================
+    total_complaints = Complaint.objects.count()
+    unresolved_complaints = Complaint.objects.filter(resolved=False).count()
+
+    # =====================================
+    # INVENTORY ANALYTICS
+    # =====================================
+    total_skus = InventoryItem.objects.count()
+
+    low_stock = InventoryItem.objects.filter(
+        quantity_in_stock__lte=F("reorder_level")
+    ).count()
+
+    inventory_value = InventoryItem.objects.aggregate(
+        total=Sum(
+            ExpressionWrapper(
+                F("quantity_in_stock") * F("unit_cost"),
+                output_field=FloatField()
+            )
+        )
+    )["total"] or 0
+
+    # =====================================
+    # CUSTOMER ANALYTICS
+    # =====================================
+    total_customers = Customer.objects.count()
+
+    avg_ltv = Customer.objects.aggregate(
+        avg=Avg("lifetime_value")
+    )["avg"] or 0
+
+    avg_churn = Customer.objects.aggregate(
+        avg=Avg("churn_probability")
+    )["avg"] or 0
+
+    # =====================================
+    # REVIEW & SENTIMENT
+    # =====================================
+    total_reviews = Review.objects.count()
+
+    avg_review_score = Review.objects.aggregate(
+        avg=Avg("overall_weighted_score")
+    )["avg"] or 0
+
+    positive_sentiment = SentimentAnalysis.objects.filter(
+        sentiment_label="Positive"
+    ).count()
+
+    total_sentiments = SentimentAnalysis.objects.count()
+
+    sentiment_positive_rate = (
+        positive_sentiment / total_sentiments * 100
+    ) if total_sentiments else 0
+
+    # =====================================
+    # MARKET ANALYTICS
+    # =====================================
+    avg_market_growth = MarketTrend.objects.aggregate(
+        avg=Avg("overall_growth_rate")
+    )["avg"] or 0
+
+    avg_market_risk = MarketTrend.objects.aggregate(
+        avg=Avg("risk_level")
+    )["avg"] or 0
+
+    context = {
+
+        # Platform
+        "bounce_rate": round(bounce_rate, 2),
+        "page_views": page_views,
+        "unique_visitors": unique_visitors,
+
+        # Supplier
+        "total_suppliers": total_suppliers,
+        "active_suppliers": active_suppliers,
+        "avg_supplier_score": round(avg_supplier_score, 2),
+        "high_risk_suppliers": high_risk_suppliers,
+
+        # Delivery
+        "on_time_rate": round(on_time_rate, 2),
+        "damaged_rate": round(damaged_rate, 2),
+
+        # Complaints
+        "total_complaints": total_complaints,
+        "unresolved_complaints": unresolved_complaints,
+
+        # Inventory
+        "total_skus": total_skus,
+        "low_stock": low_stock,
+        "inventory_value": round(inventory_value, 2),
+
+        # Customer
+        "total_customers": total_customers,
+        "avg_ltv": round(float(avg_ltv), 2),
+        "avg_churn": round(avg_churn, 2),
+
+        # Review & Sentiment
+        "total_reviews": total_reviews,
+        "avg_review_score": round(avg_review_score, 2),
+        "sentiment_positive_rate": round(sentiment_positive_rate, 2),
+
+        # Market
+        "avg_market_growth": round(avg_market_growth, 2),
+        "avg_market_risk": round(avg_market_risk, 2),
+    }
+
+    return render(request, "admin/dashboard.html", context)
 
 
 def home_view(request):
@@ -180,7 +357,7 @@ def customer_review_view(request):
         # Clear session tracking
         request.session.flush()
 
-        return redirect("thank_you")
+        return redirect("home")
 
     return render(request, "customer.html")
 

@@ -236,7 +236,6 @@ def supplier_management(request):
 
 
 def customer_review_view(request):
-
     # ---------------------------------
     # 1️⃣ TRACK PAGE VIEW AUTOMATICALLY
     # ---------------------------------
@@ -249,115 +248,124 @@ def customer_review_view(request):
         request.session["start_time"] = str(timezone.now())
 
     if request.method == "POST":
+        try:
+            # Calculate time spent
+            start_time = timezone.datetime.fromisoformat(request.session["start_time"])
+            time_spent = (timezone.now() - start_time).total_seconds()
 
-        # Calculate time spent
-        start_time = timezone.datetime.fromisoformat(request.session["start_time"])
-        time_spent = (timezone.now() - start_time).total_seconds()
+            # Count submission as click
+            clicks = 1  
 
-        # Count submission as click
-        clicks = 1  
+            # -------------------------------
+            # Save Customer
+            # -------------------------------
+            customer = CustomerProfile.objects.create(
+                full_name=request.POST.get("full_name"),
+                age_range=request.POST.get("age_range"),
+                gender=request.POST.get("gender"),
+                location=request.POST.get("location"),
+                employment_status=request.POST.get("employment_status"),
+                eating_out_frequency=request.POST.get("eating_out_frequency"),
+                preferred_brand=request.POST.get("preferred_brand")
+            )
 
-        # -------------------------------
-        # Save Customer
-        # -------------------------------
-        customer = CustomerProfile.objects.create(
-            full_name=request.POST.get("full_name"),
-            age_range=request.POST.get("age_range"),
-            gender=request.POST.get("gender"),
-            location=request.POST.get("location"),
-            employment_status=request.POST.get("employment_status"),
-            eating_out_frequency=request.POST.get("eating_out_frequency"),
-            preferred_brand=request.POST.get("preferred_brand")
-        )
+            # -------------------------------
+            # Save Brand
+            # -------------------------------
+            brand, _ = FastFoodBrand.objects.get_or_create(
+                name=request.POST.get("restaurant_name"),
+                branch=request.POST.get("branch")
+            )
 
-        # -------------------------------
-        # Save Brand
-        # -------------------------------
-        brand, _ = FastFoodBrand.objects.get_or_create(
-            name=request.POST.get("restaurant_name"),
-            branch=request.POST.get("branch")
-        )
+            # -------------------------------
+            # Save Review
+            # -------------------------------
+            review = Review.objects.create(
+                customer=customer,
+                brand=brand,
+                taste=int(request.POST.get("taste") or 0),
+                freshness=int(request.POST.get("freshness") or 0),
+                portion_size=int(request.POST.get("portion_size") or 0),
+                presentation=int(request.POST.get("presentation") or 0),
+                menu_variety=int(request.POST.get("menu_variety") or 0),
+                food_value=int(request.POST.get("food_value") or 0),
+                staff_friendliness=int(request.POST.get("staff_friendliness") or 0),
+                professionalism=int(request.POST.get("professionalism") or 0),
+                order_accuracy=int(request.POST.get("order_accuracy") or 0),
+                waiting_time=int(request.POST.get("waiting_time") or 0),
+                problem_resolution=int(request.POST.get("problem_resolution") or 0),
+                cleanliness=int(request.POST.get("cleanliness") or 0),
+                ambience=int(request.POST.get("ambience") or 0),
+                seating=int(request.POST.get("seating") or 0),
+                hygiene=int(request.POST.get("hygiene") or 0),
+                affordability=int(request.POST.get("affordability") or 0),
+                pricing_fairness=int(request.POST.get("pricing_fairness") or 0),
+                promotions=int(request.POST.get("promotions") or 0),
+                brand_reputation=int(request.POST.get("brand_reputation") or 0),
+                food_trust=int(request.POST.get("food_trust") or 0),
+                nps_score=int(request.POST.get("nps_score") or 0),
+                vs_chickeninn=request.POST.get("vs_chickeninn"),
+                vs_kfc=request.POST.get("vs_kfc"),
+                vs_galitos=request.POST.get("vs_galitos"),
+                full_experience=request.POST.get("full_experience"),
+                improvement_suggestions=request.POST.get("improvement_suggestions")
+            )
 
-        # -------------------------------
-        # Save Review (same as before)
-        # -------------------------------
-        review = Review.objects.create(
-            customer=customer,
-            brand=brand,
-            taste=int(request.POST.get("taste") or 0),
-            freshness=int(request.POST.get("freshness") or 0),
-            portion_size=int(request.POST.get("portion_size") or 0),
-            presentation=int(request.POST.get("presentation") or 0),
-            menu_variety=int(request.POST.get("menu_variety") or 0),
-            food_value=int(request.POST.get("food_value") or 0),
-            staff_friendliness=int(request.POST.get("staff_friendliness") or 0),
-            professionalism=int(request.POST.get("professionalism") or 0),
-            order_accuracy=int(request.POST.get("order_accuracy") or 0),
-            waiting_time=int(request.POST.get("waiting_time") or 0),
-            problem_resolution=int(request.POST.get("problem_resolution") or 0),
-            cleanliness=int(request.POST.get("cleanliness") or 0),
-            ambience=int(request.POST.get("ambience") or 0),
-            seating=int(request.POST.get("seating") or 0),
-            hygiene=int(request.POST.get("hygiene") or 0),
-            affordability=int(request.POST.get("affordability") or 0),
-            pricing_fairness=int(request.POST.get("pricing_fairness") or 0),
-            promotions=int(request.POST.get("promotions") or 0),
-            brand_reputation=int(request.POST.get("brand_reputation") or 0),
-            food_trust=int(request.POST.get("food_trust") or 0),
-            nps_score=int(request.POST.get("nps_score") or 0),
-            vs_chickeninn=request.POST.get("vs_chickeninn"),
-            vs_kfc=request.POST.get("vs_kfc"),
-            vs_galitos=request.POST.get("vs_galitos"),
-            full_experience=request.POST.get("full_experience"),
-            improvement_suggestions=request.POST.get("improvement_suggestions")
-        )
+            # -------------------------------
+            # SENTIMENT ANALYSIS
+            # -------------------------------
+            vader_score, bert_score = analyze_sentiment(review.full_experience or "")
+            final_sentiment = (vader_score + bert_score) / 2
+            sentiment_label = "Positive" if final_sentiment >= 0 else "Negative"
 
-        # -------------------------------
-        # SENTIMENT
-        # -------------------------------
-        vader_score, bert_score = analyze_sentiment(review.full_experience or "")
-        final_sentiment = (vader_score + bert_score) / 2
-        sentiment_label = "Positive" if final_sentiment >= 0 else "Negative"
+            SentimentAnalysis.objects.create(
+                review=review,
+                vader_score=vader_score,
+                bert_score=bert_score,
+                final_sentiment_score=final_sentiment,
+                sentiment_label=sentiment_label
+            )
 
-        SentimentAnalysis.objects.create(
-            review=review,
-            vader_score=vader_score,
-            bert_score=bert_score,
-            final_sentiment_score=final_sentiment,
-            sentiment_label=sentiment_label
-        )
+            # -------------------------------
+            # AUTO CALCULATE ENGAGEMENT
+            # -------------------------------
+            page_views = request.session.get("page_views", 1)
+            engagement_score = (
+                (page_views * 0.2) +
+                (clicks * 0.3) +
+                (time_spent * 0.001)
+            )
+            loyalty_index = (
+                (review.nps_score * 0.6) +
+                (engagement_score * 0.4)
+            )
 
-        # -------------------------------
-        # AUTO CALCULATE ENGAGEMENT
-        # -------------------------------
-        page_views = request.session.get("page_views", 1)
+            EngagementMetric.objects.create(
+                customer=customer,
+                review=review,
+                page_views=page_views,
+                clicks=clicks,
+                messages_sent=0,
+                support_tickets=0,
+                engagement_score=engagement_score,
+                loyalty_index=loyalty_index
+            )
 
-        engagement_score = (
-            (page_views * 0.2) +
-            (clicks * 0.3) +
-            (time_spent * 0.001)
-        )
+            # Clear session tracking
+            request.session.flush()
 
-        loyalty_index = (
-            (review.nps_score * 0.6) +
-            (engagement_score * 0.4)
-        )
+            # -------------------------------
+            # ADD SUCCESS ALERT
+            # -------------------------------
+            messages.success(request, "Thank you! Your review has been submitted successfully.")
 
-        EngagementMetric.objects.create(
-            customer=customer,
-            review=review,
-            page_views=page_views,
-            clicks=clicks,
-            messages_sent=0,
-            support_tickets=0,
-            engagement_score=engagement_score,
-            loyalty_index=loyalty_index
-        )
+            return redirect("customer")
 
-        # Clear session tracking
-        request.session.flush()
-
-        return redirect("home")
+        except Exception as e:
+            # -------------------------------
+            # ADD ERROR ALERT
+            # -------------------------------
+            messages.error(request, f"An error occurred while submitting your review: {str(e)}")
 
     return render(request, "customer.html")
 
@@ -748,7 +756,6 @@ def record_delivery(request):
             driver_name=driver_name,
             expected_delivery_date=expected_delivery_date,
             actual_delivery_date=actual_delivery_date,
-            comment=delivery_comment,
             created_at=timezone.now()
         )
 
@@ -775,24 +782,24 @@ def record_delivery(request):
 
         # Analyze delivery comment sentiment
         if delivery_comment:
-            vader, bert, final_score = analyze_sentiment(delivery_comment)
+            vader, bert= analyze_sentiment(delivery_comment)
+            final_score=(vader)
             SupplierSentiment.objects.create(
                 supplier=supplier,
                 source_type="delivery",
                 source_id=delivery.id,
                 text=delivery_comment,
-                vader_score=vader,
-                bert_score=bert,
-                final_sentiment_score=final_score
+                sentiment_label =vader,
+                confidence_score=final_score
             )
 
         # Update supplier performance
         perf, _ = SupplierPerformanceScore.objects.get_or_create(supplier=supplier)
-        perf.update_from_delivery(delivery)
-        perf.update_from_sentiments()
+        #perf.update_from_delivery(delivery)
+        #perf.update_from_sentiments()
 
         messages.success(request, f"Delivery for {supplier.name} recorded successfully!")
-        return redirect("supplier:delivery")
+        return redirect("delivery")
 
     return render(request, "delivery_form.html", {
         "suppliers": suppliers,
@@ -820,28 +827,28 @@ def supplier_review(request):
             communication_score=communication_score,
             flexibility_score=flexibility_score,
             documentation_score=documentation_score,
-            pricing_score=pricing_score,
-            comment=review_comment,
+            price_competitiveness_score =pricing_score,
+            review_comment=review_comment,
             created_at=timezone.now()
         )
 
         # Analyze review sentiment
         if review_comment:
-            vader, bert, final_score = analyze_sentiment(review_comment)
+            vader, bert = analyze_sentiment(review_comment)
+            final_score=(vader)
             SupplierSentiment.objects.create(
                 supplier=supplier,
                 source_type="review",
                 source_id=review.id,
                 text=review_comment,
-                vader_score=vader,
-                bert_score=bert,
-                final_sentiment_score=final_score
+                sentiment_label =vader,
+                confidence_score=final_score
             )
 
         # Update supplier performance
-        perf, _ = SupplierPerformanceScore.objects.get_or_create(supplier=supplier)
-        perf.update_from_review(review)
-        perf.update_from_sentiments()
+        perf= SupplierPerformanceScore.objects.get_or_create(supplier=supplier)
+        # perf.update_from_review(review)
+        # perf.update_from_sentiments()
         messages.success(request, f"Review for {supplier.name} recorded successfully!")
         return redirect("supplier_review")
 
@@ -870,24 +877,24 @@ def record_complaint(request):
 
         # Negative sentiment from complaint
         if description:
-            vader, bert, final_score = analyze_sentiment(description)
+            vader, bert= analyze_sentiment(description)
+            final_score=vader
             final_score = min(final_score, 0)  # ensure negative
             SupplierSentiment.objects.create(
                 supplier=supplier,
                 source_type="complaint",
                 source_id=complaint.id,
                 text=description,
-                vader_score=vader,
-                bert_score=bert,
-                final_sentiment_score=final_score
+               sentiment_label =vader,
+                confidence_score=final_score
             )
 
         # Update supplier performance
         perf, _ = SupplierPerformanceScore.objects.get_or_create(supplier=supplier)
-        perf.update_from_complaint(complaint)
-        perf.update_from_sentiments()
+        # perf.update_from_complaint(complaint)
+        # perf.update_from_sentiments()
         messages.success(request, f"Complaint for {supplier.name} recorded successfully!")
-        return redirect("record_complaint")
+        return redirect("supplier_complaint")
 
     return render(request, "complaint_form.html", {
         "suppliers": suppliers,

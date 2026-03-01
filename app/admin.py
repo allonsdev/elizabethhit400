@@ -1,22 +1,79 @@
 from django.contrib import admin
+from django.db import models
+from django.utils.html import format_html
 
 from .models import *
 
 
+# ============================================================
+# MARKET INDICATOR INLINE
+# ============================================================
 class MarketIndicatorInline(admin.TabularInline):
     model = MarketIndicator
     extra = 0
     show_change_link = True
+    readonly_fields = ('status', 'color_indicator', 'rendered_data')
 
+    def status(self, obj):
+        return "High" if obj.value > 50 else "Low"
+
+    def color_indicator(self, obj):
+        return format_html(
+            '<span style="color:{};">●</span>',
+            'red' if obj.value > 50 else 'green'
+        )
+
+    def rendered_data(self, obj):
+        return f"{obj.value} {obj.unit}"
+
+    status.short_description = "Status"
+    color_indicator.short_description = "Indicator"
+    rendered_data.short_description = "Rendered Data"
+
+
+# ============================================================
+# COMPETITOR MARKET DATA INLINE
+# ============================================================
 class CompetitorMarketDataInline(admin.TabularInline):
     model = CompetitorMarketData
     extra = 0
     show_change_link = True
+    readonly_fields = (
+        'status',
+        'color_indicator',
+        'market_share_gap',
+        'rendered_data',
+    )
+
+    def status(self, obj):
+        return "Leader" if obj.market_share_percentage >= 50 else "Follower"
+
+    def color_indicator(self, obj):
+        return format_html(
+            '<span style="color:{};">●</span>',
+            'green' if obj.market_share_percentage >= 50 else 'orange'
+        )
+
+    def market_share_gap(self, obj):
+        top = CompetitorMarketData.objects.filter(trend=obj.trend).aggregate(
+            models.Max('market_share_percentage')
+        )['market_share_percentage__max'] or 0
+        return round(top - obj.market_share_percentage, 2)
+
+    def rendered_data(self, obj):
+        return f"{obj.market_share_percentage}% market share"
+
+    status.short_description = "Status"
+    color_indicator.short_description = "Indicator"
+    market_share_gap.short_description = "Gap to Leader"
+    rendered_data.short_description = "Rendered Data"
 
 
+# ============================================================
+# MARKET TREND ADMIN (AGGREGATED)
+# ============================================================
 @admin.register(MarketTrend)
 class MarketTrendAdmin(admin.ModelAdmin):
-
     list_display = (
         "trend_title",
         "industry",
@@ -25,9 +82,8 @@ class MarketTrendAdmin(admin.ModelAdmin):
         "market_size_value",
         "risk_level",
         "confidence_score",
-        "start_period",
-        "end_period",
-        "created_at"
+        "indicator_count",
+        "competitor_count",
     )
 
     list_filter = (
@@ -47,23 +103,24 @@ class MarketTrendAdmin(admin.ModelAdmin):
     )
 
     date_hierarchy = "start_period"
+    ordering = ("-start_period",)
+    inlines = [MarketIndicatorInline, CompetitorMarketDataInline]
 
     readonly_fields = (
-        "scraped_at",
-        "created_at",
+        "indicator_count",
+        "competitor_count",
+        "average_indicator_value",
     )
-
-    ordering = ("-start_period",)
-
-    inlines = [MarketIndicatorInline, CompetitorMarketDataInline]
 
     fieldsets = (
         ("Basic Information", {
+            "fields": ("industry", "market_region", "trend_title", "trend_summary")
+        }),
+        ("Analytics (Read Only)", {
             "fields": (
-                "industry",
-                "market_region",
-                "trend_title",
-                "trend_summary"
+                "indicator_count",
+                "competitor_count",
+                "average_indicator_value",
             )
         }),
         ("Core Market Metrics", {
@@ -71,7 +128,7 @@ class MarketTrendAdmin(admin.ModelAdmin):
                 "overall_growth_rate",
                 "market_size_value",
                 "inflation_impact_index",
-                "consumer_spending_index"
+                "consumer_spending_index",
             )
         }),
         ("Risk & Stability", {
@@ -79,14 +136,14 @@ class MarketTrendAdmin(admin.ModelAdmin):
                 "risk_level",
                 "political_risk_index",
                 "economic_volatility_index",
-                "supply_chain_stability_index"
+                "supply_chain_stability_index",
             )
         }),
         ("Digital & Consumer Trends", {
             "fields": (
                 "online_ordering_growth",
                 "delivery_adoption_rate",
-                "youth_demand_index"
+                "youth_demand_index",
             )
         }),
         ("Data Source & AI Analysis", {
@@ -95,17 +152,31 @@ class MarketTrendAdmin(admin.ModelAdmin):
                 "source_url",
                 "analysis_model",
                 "confidence_score",
-                "scraped_at"
+                "scraped_at",
             )
         }),
         ("Period", {
-            "fields": (
-                "start_period",
-                "end_period"
-            )
+            "fields": ("start_period", "end_period")
         }),
     )
 
+    def indicator_count(self, obj):
+        return obj.indicators.count()
+
+    def competitor_count(self, obj):
+        return obj.competitors.count()
+
+    def average_indicator_value(self, obj):
+        return obj.indicators.aggregate(models.Avg('value'))['value__avg'] or 0
+
+    indicator_count.short_description = "Indicators"
+    competitor_count.short_description = "Competitors"
+    average_indicator_value.short_description = "Avg Indicator"
+
+
+# ============================================================
+# VISITOR LOG ADMIN
+# ============================================================
 @admin.register(VisitorLog)
 class VisitorLogAdmin(admin.ModelAdmin):
     list_display = (
@@ -134,30 +205,30 @@ class VisitorLogAdmin(admin.ModelAdmin):
     )
     date_hierarchy = "visited_at"
     ordering = ("-visited_at",)
-    
-    
-    
-    
+
+
+# ============================================================
+# SCRAPED MARKET SOURCE ADMIN
+# ============================================================
 @admin.register(ScrapedMarketSource)
 class ScrapedMarketSourceAdmin(admin.ModelAdmin):
-
     list_display = (
         "source_name",
         "source_url",
         "sentiment_score",
         "processed",
-        "scraped_at"
+        "scraped_at",
     )
 
     list_filter = (
         "processed",
-        "scraped_at"
+        "scraped_at",
     )
 
     search_fields = (
         "source_name",
         "source_url",
-        "extracted_text"
+        "extracted_text",
     )
 
     readonly_fields = (
@@ -167,49 +238,67 @@ class ScrapedMarketSourceAdmin(admin.ModelAdmin):
     ordering = ("-scraped_at",)
 
 
-
+# ============================================================
+# COMPETITOR MARKET DATA ADMIN
+# ============================================================
 @admin.register(CompetitorMarketData)
 class CompetitorMarketDataAdmin(admin.ModelAdmin):
-
     list_display = (
         "brand_name",
         "market_share_percentage",
-        "average_price",
-        "revenue_estimate",
-        "brand_growth_rate",
-        "customer_satisfaction_index",
+        "market_status",
+        "market_share_gap",
+        "trend",
         "recorded_date",
-        "trend"
     )
 
     list_filter = (
         "brand_name",
         "recorded_date",
         "trend__market_region",
-        "trend__industry"
+        "trend__industry",
     )
 
     search_fields = (
         "brand_name",
-        "trend__trend_title"
+        "trend__trend_title",
     )
 
     date_hierarchy = "recorded_date"
-
     ordering = ("-recorded_date",)
 
+    readonly_fields = (
+        "market_status",
+        "market_share_gap",
+    )
+
+    def market_status(self, obj):
+        return "Leader" if obj.market_share_percentage >= 50 else "Follower"
+
+    def market_share_gap(self, obj):
+        top = CompetitorMarketData.objects.filter(trend=obj.trend).aggregate(
+            models.Max('market_share_percentage')
+        )['market_share_percentage__max'] or 0
+        return round(top - obj.market_share_percentage, 2)
+
+    market_status.short_description = "Status"
+    market_share_gap.short_description = "Gap to Leader"
 
 
+# ============================================================
+# MARKET INDICATOR ADMIN
+# ============================================================
 @admin.register(MarketIndicator)
 class MarketIndicatorAdmin(admin.ModelAdmin):
-
     list_display = (
         "indicator_name",
         "indicator_category",
         "value",
         "unit",
+        "status",
+        "color_indicator",
+        "trend",
         "recorded_date",
-        "trend"
     )
 
     list_filter = (
@@ -217,38 +306,103 @@ class MarketIndicatorAdmin(admin.ModelAdmin):
         "unit",
         "recorded_date",
         "trend__industry",
-        "trend__market_region"
+        "trend__market_region",
     )
 
     search_fields = (
         "indicator_name",
-        "trend__trend_title"
+        "trend__trend_title",
     )
 
     date_hierarchy = "recorded_date"
-
     ordering = ("-recorded_date",)
 
+    readonly_fields = (
+        "status",
+        "color_indicator",
+        "rendered_data",
+    )
+
+    def status(self, obj):
+        return "High" if obj.value > 50 else "Low"
+
+    def color_indicator(self, obj):
+        return format_html(
+            '<span style="color:{};">●</span>',
+            'red' if obj.value > 50 else 'green'
+        )
+
+    def rendered_data(self, obj):
+        return f"{obj.value} {obj.unit}"
+
+    status.short_description = "Status"
+    color_indicator.short_description = "Indicator"
+    rendered_data.short_description = "Rendered"
 
 
-
-
-
-
-# Customer Profile Admin
-# ---------------------------------------
+# ============================================================
+# CUSTOMER PROFILE ADMIN (AGGREGATED)
+# ============================================================
 @admin.register(CustomerProfile)
 class CustomerProfileAdmin(admin.ModelAdmin):
-    list_display = ('full_name', 'age_range', 'gender', 'location', 'employment_status', 'eating_out_frequency', 'preferred_brand', 'created_at')
-    list_filter = ('age_range', 'gender', 'location', 'employment_status', 'eating_out_frequency', 'preferred_brand', 'created_at')
-    search_fields = ('full_name', 'location', 'preferred_brand')
+    list_display = (
+        'full_name',
+        'age_range',
+        'gender',
+        'location',
+        'total_reviews',
+        'average_food_score',
+        'overall_average_score',
+    )
+
+    list_filter = (
+        'age_range',
+        'gender',
+        'location',
+        'employment_status',
+        'eating_out_frequency',
+        'preferred_brand',
+        'created_at',
+    )
+
+    search_fields = (
+        'full_name',
+        'location',
+        'preferred_brand',
+    )
+
     ordering = ('-created_at',)
-    readonly_fields = ('created_at',)
+    readonly_fields = (
+        'total_reviews',
+        'average_food_score',
+        'overall_average_score',
+        'sentiment_display',
+    )
+
+    def total_reviews(self, obj):
+        return obj.review_set.count()
+
+    def average_food_score(self, obj):
+        return obj.review_set.aggregate(
+            models.Avg('food_value')
+        )['food_value__avg'] or 0
+
+    def overall_average_score(self, obj):
+        return obj.review_set.aggregate(
+            models.Avg('overall_weighted_score')
+        )['overall_weighted_score__avg'] or 0
+
+    def sentiment_display(self, obj):
+        data = SentimentAnalysis.objects.filter(review__customer=obj)
+        summary = data.values('sentiment_label').annotate(count=models.Count('id'))
+        return ", ".join([f"{d['sentiment_label']}: {d['count']}" for d in summary])
+
+    sentiment_display.short_description = "Sentiment Summary"
 
 
-# ---------------------------------------
-# Fast Food Brand Admin
-# ---------------------------------------
+# ============================================================
+# FAST FOOD BRAND ADMIN
+# ============================================================
 @admin.register(FastFoodBrand)
 class FastFoodBrandAdmin(admin.ModelAdmin):
     list_display = ('name', 'branch', 'location')
@@ -256,153 +410,245 @@ class FastFoodBrandAdmin(admin.ModelAdmin):
     search_fields = ('name', 'branch', 'location')
 
 
-# ---------------------------------------
-# Review Admin
-# ---------------------------------------
+# ============================================================
+# REVIEW ADMIN
+# ============================================================
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
     list_display = (
-        'brand', 'customer', 'overall_weighted_score',
-        'competitor_advantage', 'nps_score', 'created_at'
+        'brand',
+        'customer',
+        'overall_weighted_score',
+        'competitor_advantage',
+        'nps_score',
+        'created_at',
     )
+
     list_filter = ('brand', 'created_at', 'nps_score')
     search_fields = ('customer__full_name', 'brand__name', 'full_experience')
     ordering = ('-created_at',)
-
     readonly_fields = ('overall_weighted_score', 'competitor_advantage')
 
 
-# ---------------------------------------
-# Sentiment Analysis Admin
-# ---------------------------------------
+# ============================================================
+# SENTIMENT ANALYSIS ADMIN
+# ============================================================
 @admin.register(SentimentAnalysis)
 class SentimentAnalysisAdmin(admin.ModelAdmin):
-    list_display = ('review', 'vader_score', 'bert_score', 'final_sentiment_score', 'sentiment_label', 'analyzed_at')
+    list_display = (
+        'review',
+        'vader_score',
+        'bert_score',
+        'final_sentiment_score',
+        'sentiment_label',
+        'analyzed_at',
+    )
+
     list_filter = ('sentiment_label', 'analyzed_at')
     search_fields = ('review__full_experience',)
     ordering = ('-analyzed_at',)
-    readonly_fields = ('vader_score', 'bert_score', 'final_sentiment_score', 'sentiment_label', 'analyzed_at')
+    readonly_fields = (
+        'vader_score',
+        'bert_score',
+        'final_sentiment_score',
+        'sentiment_label',
+        'analyzed_at',
+    )
 
 
-# ---------------------------------------
-# Engagement Metric Admin
-# ---------------------------------------
+# ============================================================
+# ENGAGEMENT METRIC ADMIN
+# ============================================================
 @admin.register(EngagementMetric)
 class EngagementMetricAdmin(admin.ModelAdmin):
-    list_display = ('customer', 'review', 'engagement_score', 'loyalty_index', 'recorded_month')
+    list_display = (
+        'customer',
+        'review',
+        'engagement_score',
+        'loyalty_index',
+        'recorded_month',
+    )
+
     list_filter = ('recorded_month',)
     search_fields = ('customer__full_name',)
     ordering = ('-recorded_month',)
     readonly_fields = ('engagement_score', 'loyalty_index')
 
+
+# ============================================================
+# INVENTORY ITEM ADMIN
+# ============================================================
 @admin.register(InventoryItem)
 class InventoryItemAdmin(admin.ModelAdmin):
     list_display = (
-        'sku', 'name', 'supplier',
-        'category', 'quantity_in_stock',
-        'reorder_level', 'unit_cost',
-        'selling_price', 'is_active'
+        'sku',
+        'name',
+        'supplier',
+        'category',
+        'quantity_in_stock',
+        'reorder_level',
+        'unit_cost',
+        'selling_price',
+        'is_active',
     )
 
     list_filter = (
-        'category', 'supplier', 'is_active'
+        'category',
+        'supplier',
+        'is_active',
     )
 
     search_fields = (
-        'sku', 'name', 'supplier__business_name'
+        'sku',
+        'name',
+        'supplier__company_name',
     )
 
     ordering = ('quantity_in_stock',)
-
-    readonly_fields = (
-        'last_restocked', 'last_sold'
-    )
+    readonly_fields = ('last_restocked', 'last_sold')
 
 
-
-
-@admin.register(Benchmark)
-class BenchmarkAdmin(admin.ModelAdmin):
+# ============================================================
+# SUPPLIER PERFORMANCE ADMIN
+# ============================================================
+@admin.register(SupplierPerformanceScore)
+class SupplierPerformanceScoreAdmin(admin.ModelAdmin):
     list_display = (
-        'supplier', 'metric_name',
-        'metric_value', 'industry_average',
-        'percentile_rank', 'benchmark_score',
-        'evaluation_period'
+        'supplier',
+        'final_score',
+        'rating_category',
+        'timeliness_score',
+        'quantity_accuracy_score',
+        'quality_score',
+        'complaint_score',
+        'consistency_score',
+        'trust_index',
+        'risk_index',
+        'last_updated',
     )
 
-    list_filter = (
-        'metric_name', 'evaluation_period'
-    )
-
-    search_fields = (
-        'supplier__business_name', 'metric_name'
-    )
-
-    ordering = ('-benchmark_score',)
+    list_filter = ('rating_category', 'last_updated')
+    search_fields = ('supplier__company_name',)
+    ordering = ('-final_score',)
+    readonly_fields = ('final_score', 'rating_category', 'last_updated')
 
 
-
-
+# ============================================================
+# SUPPLIER ADMIN (AGGREGATED)
+# ============================================================
 @admin.register(Supplier)
 class SupplierAdmin(admin.ModelAdmin):
-    list_display = ('supplier_code', 'name', 'company_name', 'contact_person', 'phone', 'location', 'is_active', 'created_at')
+    list_display = (
+        'supplier_code',
+        'name',
+        'company_name',
+        'contact_person',
+        'phone',
+        'location',
+        'is_active',
+        'average_performance_score',
+        'average_delivery_status',
+        'complaint_count',
+        'sentiment_score',
+    )
+
     list_filter = ('is_active', 'location', 'created_at')
     search_fields = ('supplier_code', 'name', 'company_name', 'contact_person', 'phone', 'email')
     ordering = ('name',)
-    readonly_fields = ('created_at',)
+    readonly_fields = (
+        'average_performance_score',
+        'average_delivery_status',
+        'complaint_count',
+        'sentiment_score',
+    )
+
+    def average_performance_score(self, obj):
+        return obj.supplierperformancescore.final_score if hasattr(obj, 'supplierperformancescore') else 0
+
+    def average_delivery_status(self, obj):
+        total = obj.deliveries.count()
+        if total == 0:
+            return "No deliveries"
+        on_time = obj.deliveries.filter(delivery_status='ON_TIME').count()
+        return f"{(on_time / total) * 100:.2f}% on time"
+
+    def complaint_count(self, obj):
+        return obj.complaints.filter(resolved=False).count()
+
+    def sentiment_score(self, obj):
+        return obj.sentiments.aggregate(
+            models.Avg('confidence_score')
+        )['confidence_score__avg'] or 0
+
+    average_performance_score.short_description = "Performance"
+    average_delivery_status.short_description = "Delivery Rate"
+    complaint_count.short_description = "Complaints"
+    sentiment_score.short_description = "Sentiment"
 
 
-# -------------------------
-# Delivery Admin
-# -------------------------
+# ============================================================
+# DELIVERY ADMIN
+# ============================================================
 @admin.register(Delivery)
 class DeliveryAdmin(admin.ModelAdmin):
-    list_display = ('supplier', 'order_number', 'invoice_number', 'product_category', 'quantity_ordered', 'quantity_delivered', 'delivery_status', 'condition_status', 'expected_delivery_date', 'actual_delivery_date', 'created_at')
-    list_filter = ('delivery_status', 'condition_status', 'product_category', 'expected_delivery_date', 'actual_delivery_date', 'created_at')
-    search_fields = ('supplier__name', 'order_number', 'invoice_number', 'vehicle_registration', 'driver_name')
+    list_display = (
+        'supplier',
+        'order_number',
+        'invoice_number',
+        'product_category',
+        'quantity_ordered',
+        'quantity_delivered',
+        'delivery_status',
+        'condition_status',
+        'expected_delivery_date',
+        'actual_delivery_date',
+        'created_at',
+    )
+
+    list_filter = (
+        'delivery_status',
+        'condition_status',
+        'product_category',
+        'expected_delivery_date',
+        'actual_delivery_date',
+        'created_at',
+    )
+
+    search_fields = (
+        'supplier__name',
+        'order_number',
+        'invoice_number',
+        'vehicle_registration',
+        'driver_name',
+    )
+
     ordering = ('-actual_delivery_date',)
     readonly_fields = ('created_at',)
 
 
-# -------------------------
-# Supplier Review Admin
-# -------------------------
+# ============================================================
+# SUPPLIER REVIEW ADMIN
+# ============================================================
 @admin.register(SupplierReview)
 class SupplierReviewAdmin(admin.ModelAdmin):
-    list_display = ('supplier', 'communication_score', 'flexibility_score', 'price_competitiveness_score', 'documentation_score', 'created_at')
+    list_display = (
+        'supplier',
+        'communication_score',
+        'flexibility_score',
+        'price_competitiveness_score',
+        'documentation_score',
+        'created_at',
+    )
+
     list_filter = ('created_at',)
     search_fields = ('supplier__name', 'review_comment')
     ordering = ('-created_at',)
     readonly_fields = ('created_at',)
 
 
-# -------------------------
-# Supplier Performance Score Admin
-# -------------------------
-@admin.register(SupplierPerformanceScore)
-class SupplierPerformanceScoreAdmin(admin.ModelAdmin):
-    list_display = ('supplier', 'final_score', 'rating_category', 'timeliness_score', 'quantity_accuracy_score', 'quality_score', 'complaint_score', 'consistency_score', 'trust_index', 'risk_index', 'last_updated')
-    list_filter = ('rating_category', 'last_updated')
-    search_fields = ('supplier__name',)
-    ordering = ('-final_score',)
-    readonly_fields = ('final_score', 'last_updated')
-
-
-# -------------------------
-# Supplier Sentiment Admin
-# -------------------------
-@admin.register(SupplierSentiment)
-class SupplierSentimentAdmin(admin.ModelAdmin):
-    list_display = ('supplier', 'source_type', 'sentiment_label', 'confidence_score', 'created_at')
-    list_filter = ('source_type', 'sentiment_label', 'created_at')
-    search_fields = ('supplier__name', 'text')
-    ordering = ('-created_at',)
-    readonly_fields = ('created_at',)
-
-
-# -------------------------
-# Complaint Admin
-# -------------------------
+# ============================================================
+# COMPLAINT ADMIN
+# ============================================================
 @admin.register(Complaint)
 class ComplaintAdmin(admin.ModelAdmin):
     list_display = ('supplier', 'severity_level', 'resolved', 'created_at')

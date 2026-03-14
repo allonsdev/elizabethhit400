@@ -1,0 +1,1405 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+
+<title>SupplyInsight</title>
+  <base href="/static/" />
+<!-- plugins:css -->
+<link rel="stylesheet" href="assets/vendors/feather/feather.css">
+<link rel="stylesheet" href="assets/vendors/mdi/css/materialdesignicons.min.css">
+<link rel="stylesheet" href="assets/vendors/ti-icons/css/themify-icons.css">
+<link rel="stylesheet" href="assets/vendors/font-awesome/css/font-awesome.min.css">
+<link rel="stylesheet" href="assets/vendors/typicons/typicons.css">
+<link rel="stylesheet" href="assets/vendors/simple-line-icons/css/simple-line-icons.css">
+<link rel="stylesheet" href="assets/vendors/css/vendor.bundle.base.css">
+<link rel="stylesheet" href="assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css">
+
+<!-- Plugin css for this page -->
+<link rel="stylesheet" href="assets/vendors/ti-icons/css/themify-icons.css">
+
+<!-- Main style -->
+<link rel="stylesheet" href="assets/css/vertical-layout-light/style.css">
+
+<link rel="shortcut icon" href="assets/images/favicon.png">
+
+<!-- DataTables -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+
+    <style>
+      .dataTables_paginate {
+        margin-top: 15px;
+        text-align: right;
+      }
+
+      .dataTables_paginate .paginate_button {
+        padding: 6px 12px;
+        margin-left: 3px;
+        border: 1px solid #dee2e6;
+        background: #fff;
+        color: #007bff !important;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .dataTables_paginate .paginate_button.current {
+        background: #007bff;
+        color: #fff !important;
+      }
+
+      .dataTables_paginate .paginate_button:hover {
+        background: #0056b3;
+        color: #fff !important;
+      }
+      table.dataTable thead th {
+        background: #1f2d3d;
+        color: white;
+        font-weight: 600;
+      }
+
+      table.dataTable {
+        width: 100% !important;
+      }
+
+      .dataTables_wrapper {
+        margin-top: 10px;
+      }
+      .dataTables_filter {
+        float: right;
+        margin-bottom: 10px;
+      }
+
+      .dataTables_filter input {
+        border: 1px solid #ccc;
+        padding: 5px;
+        border-radius: 4px;
+      }
+    </style>
+</head>
+
+  <body class="sidebar-icon-only with-welcome-text">
+    <div class="container-scroller">
+      <div class="row p-0 m-0 proBanner" id="proBanner">
+        <div class="col-md-12 p-0 m-0">
+          <div
+            class="card-body card-body-padding px-3 d-flex align-items-center justify-content-between"
+          >
+            <div class="ps-lg-3">
+              <div class="d-flex align-items-center justify-content-between">
+                <p class="mb-0 fw-medium me-3 buy-now-text">Welcome To</p>
+                <a
+                  href="/dashboard"
+                  target="_blank"
+                  class="btn me-2 buy-now-btn border-0"
+                  >SupplyInsight</a
+                >
+              </div>
+            </div>
+            <div class="d-flex align-items-center justify-content-between">
+              <a href="/dashboard"><i class="ti-home me-3 text-white"></i></a>
+              <button id="bannerClose" class="btn border-0 p-0">
+                <i class="ti-close text-white"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- partial:partials/_navbar.html -->
+      <nav
+        class="navbar default-layout col-lg-12 col-12 p-0 fixed-top d-flex align-items-top flex-row"
+      >
+        <div
+          class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-start"
+        >
+          <div class="me-3">
+            <button
+              class="navbar-toggler navbar-toggler align-self-center"
+              type="button"
+              data-bs-toggle="minimize"
+            >
+              <span class="icon-menu"></span>
+            </button>
+          </div>
+          <div class="brand-logo">
+            <img
+              src="/assets/images/logo.png"
+              alt="logo"
+              style="height: 200px; width: auto"
+            />
+          </div>
+        </div>
+        <div class="navbar-menu-wrapper d-flex align-items-top">
+          <ul class="navbar-nav">
+            <li class="nav-item fw-semibold d-none d-lg-block ms-0">
+              <h1 class="welcome-text">
+                Good Morning,
+                <span class="text-black fw-bold"
+                  >{{ request.user.username }}</span
+                >
+              </h1>
+              <h3 class="welcome-sub-text">Performance summary this week</h3>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item dropdown d-none d-lg-block">
+              <a
+                class="nav-link dropdown-bordered dropdown-toggle dropdown-toggle-split"
+                id="messageDropdown"
+                href="#"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Select Category
+              </a>
+              <div
+                class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list pb-0"
+                aria-labelledby="messageDropdown"
+              >
+                <a class="dropdown-item py-3">
+                  <p class="mb-0 fw-medium float-start">Select category</p>
+                </a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item preview-item">
+                  <div class="preview-item-content flex-grow py-2">
+                    <p class="preview-subject ellipsis fw-medium text-dark">
+                      Bootstrap Bundle
+                    </p>
+                    <p class="fw-light small-text mb-0">
+                      This is a Bundle featuring 16 unique dashboards
+                    </p>
+                  </div>
+                </a>
+                <a class="dropdown-item preview-item">
+                  <div class="preview-item-content flex-grow py-2">
+                    <p class="preview-subject ellipsis fw-medium text-dark">
+                      Angular Bundle
+                    </p>
+                    <p class="fw-light small-text mb-0">
+                      Everything you’ll ever need for your Angular projects
+                    </p>
+                  </div>
+                </a>
+                <a class="dropdown-item preview-item">
+                  <div class="preview-item-content flex-grow py-2">
+                    <p class="preview-subject ellipsis fw-medium text-dark">
+                      VUE Bundle
+                    </p>
+                    <p class="fw-light small-text mb-0">
+                      Bundle of 6 Premium Vue Admin Dashboard
+                    </p>
+                  </div>
+                </a>
+                <a class="dropdown-item preview-item">
+                  <div class="preview-item-content flex-grow py-2">
+                    <p class="preview-subject ellipsis fw-medium text-dark">
+                      React Bundle
+                    </p>
+                    <p class="fw-light small-text mb-0">
+                      Bundle of 8 Premium React Admin Dashboard
+                    </p>
+                  </div>
+                </a>
+              </div>
+            </li>
+            <li class="nav-item d-none d-lg-block">
+              <div
+                id="datepicker-popup"
+                class="input-group date datepicker navbar-date-picker"
+              >
+                <span
+                  class="input-group-addon input-group-prepend border-right"
+                >
+                  <span
+                    class="icon-calendar input-group-text calendar-icon"
+                  ></span>
+                </span>
+                <input type="text" class="form-control" />
+              </div>
+            </li>
+            <li class="nav-item">
+              <form class="search-form" action="#">
+                <i class="icon-search"></i>
+                <input
+                  type="search"
+                  class="form-control"
+                  placeholder="Search Here"
+                  title="Search here"
+                />
+              </form>
+            </li>
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link count-indicator"
+                id="notificationDropdown"
+                href="#"
+                data-bs-toggle="dropdown"
+              >
+                <i class="icon-bell"></i>
+                <span class="count"></span>
+              </a>
+              <div
+                class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list pb-0"
+                aria-labelledby="notificationDropdown"
+              >
+                <a class="dropdown-item py-3 border-bottom">
+                  <p class="mb-0 fw-medium float-start">
+                    You have 4 new notifications
+                  </p>
+                  <span class="badge badge-pill badge-primary float-end"
+                    >View all</span
+                  >
+                </a>
+                <a class="dropdown-item preview-item py-3">
+                  <div class="preview-thumbnail">
+                    <i class="mdi mdi-alert m-auto text-primary"></i>
+                  </div>
+                  <div class="preview-item-content">
+                    <h6 class="preview-subject fw-normal text-dark mb-1">
+                      Application Error
+                    </h6>
+                    <p class="fw-light small-text mb-0">Just now</p>
+                  </div>
+                </a>
+                <a class="dropdown-item preview-item py-3">
+                  <div class="preview-thumbnail">
+                    <i class="mdi mdi-lock-outline m-auto text-primary"></i>
+                  </div>
+                  <div class="preview-item-content">
+                    <h6 class="preview-subject fw-normal text-dark mb-1">
+                      Settings
+                    </h6>
+                    <p class="fw-light small-text mb-0">Private message</p>
+                  </div>
+                </a>
+                <a class="dropdown-item preview-item py-3">
+                  <div class="preview-thumbnail">
+                    <i class="mdi mdi-airballoon m-auto text-primary"></i>
+                  </div>
+                  <div class="preview-item-content">
+                    <h6 class="preview-subject fw-normal text-dark mb-1">
+                      New user registration
+                    </h6>
+                    <p class="fw-light small-text mb-0">2 days ago</p>
+                  </div>
+                </a>
+              </div>
+            </li>
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link count-indicator"
+                id="countDropdown"
+                href="#"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                <i class="icon-mail icon-lg"></i>
+              </a>
+              <div
+                class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list pb-0"
+                aria-labelledby="countDropdown"
+              >
+                <a class="dropdown-item py-3">
+                  <p class="mb-0 fw-medium float-start">
+                    You have 7 unread mails
+                  </p>
+                  <span class="badge badge-pill badge-primary float-end"
+                    >View all</span
+                  >
+                </a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item preview-item">
+                  <div class="preview-thumbnail">
+                    <img
+                      src="/assets/images/faces/face10.jpg"
+                      alt="image"
+                      class="img-sm profile-pic"
+                    />
+                  </div>
+                  <div class="preview-item-content flex-grow py-2">
+                    <p class="preview-subject ellipsis fw-medium text-dark">
+                      Marian Garner
+                    </p>
+                    <p class="fw-light small-text mb-0">
+                      The meeting is cancelled
+                    </p>
+                  </div>
+                </a>
+                <a class="dropdown-item preview-item">
+                  <div class="preview-thumbnail">
+                    <img
+                      src="/assets/images/faces/face12.jpg"
+                      alt="image"
+                      class="img-sm profile-pic"
+                    />
+                  </div>
+                  <div class="preview-item-content flex-grow py-2">
+                    <p class="preview-subject ellipsis fw-medium text-dark">
+                      David Grey
+                    </p>
+                    <p class="fw-light small-text mb-0">
+                      The meeting is cancelled
+                    </p>
+                  </div>
+                </a>
+                <a class="dropdown-item preview-item">
+                  <div class="preview-thumbnail">
+                    <img
+                      src="/assets/images/faces/face1.jpg"
+                      alt="image"
+                      class="img-sm profile-pic"
+                    />
+                  </div>
+                  <div class="preview-item-content flex-grow py-2">
+                    <p class="preview-subject ellipsis fw-medium text-dark">
+                      Travis Jenkins
+                    </p>
+                    <p class="fw-light small-text mb-0">
+                      The meeting is cancelled
+                    </p>
+                  </div>
+                </a>
+              </div>
+            </li>
+            <li class="nav-item dropdown d-none d-lg-block user-dropdown">
+              <a
+                class="nav-link"
+                id="UserDropdown"
+                href="#"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                <img
+                  class="img-xs rounded-circle"
+                  src="/assets/images/faces/face8.jpg"
+                  alt="Profile image"
+                />
+              </a>
+              <div
+                class="dropdown-menu dropdown-menu-right navbar-dropdown"
+                aria-labelledby="UserDropdown"
+              >
+                <div class="dropdown-header text-center">
+                  <img
+                    class="img-md rounded-circle"
+                    src="/assets/images/faces/face8.jpg"
+                    alt="Profile image"
+                  />
+                  <p class="mb-1 mt-3 fw-semibold">Allen Moreno</p>
+                  <p class="fw-light text-muted mb-0">allenmoreno@gmail.com</p>
+                </div>
+                <a class="dropdown-item"
+                  ><i
+                    class="dropdown-item-icon mdi mdi-account-outline text-primary me-2"
+                  ></i>
+                  My Profile
+                  <span class="badge badge-pill badge-danger">1</span></a
+                >
+                <a class="dropdown-item"
+                  ><i
+                    class="dropdown-item-icon mdi mdi-message-text-outline text-primary me-2"
+                  ></i>
+                  Messages</a
+                >
+                <a class="dropdown-item"
+                  ><i
+                    class="dropdown-item-icon mdi mdi-calendar-check-outline text-primary me-2"
+                  ></i>
+                  Activity</a
+                >
+                <a class="dropdown-item"
+                  ><i
+                    class="dropdown-item-icon mdi mdi-help-circle-outline text-primary me-2"
+                  ></i>
+                  FAQ</a
+                >
+                <a class="dropdown-item"
+                  ><i
+                    class="dropdown-item-icon mdi mdi-power text-primary me-2"
+                  ></i
+                  >Sign Out</a
+                >
+              </div>
+            </li>
+          </ul>
+          <button
+            class="navbar-toggler navbar-toggler-right d-lg-none align-self-center"
+            type="button"
+            data-bs-toggle="offcanvas"
+          >
+            <span class="mdi mdi-menu"></span>
+          </button>
+        </div>
+      </nav>
+      <!-- partial -->
+      <div class="container-fluid page-body-wrapper">
+        <!-- partial:partials/_settings-panel.html -->
+        <div class="theme-setting-wrapper">
+          <div id="settings-trigger"><i class="ti-settings"></i></div>
+          <div id="theme-settings" class="settings-panel">
+            <i class="settings-close ti-close"></i>
+            <p class="settings-heading mt-2">HEADER SKINS</p>
+            <div class="color-tiles mx-0 px-4">
+              <div class="tiles success"></div>
+              <div class="tiles warning"></div>
+              <div class="tiles danger"></div>
+              <div class="tiles light"></div>
+              <div class="tiles info"></div>
+              <div class="tiles dark"></div>
+              <div class="tiles default"></div>
+            </div>
+          </div>
+        </div>
+        <div id="right-sidebar" class="settings-panel">
+          <i class="settings-close ti-close"></i>
+          <ul class="nav nav-tabs border-top" id="setting-panel" role="tablist">
+            <li class="nav-item">
+              <a
+                class="nav-link active"
+                id="todo-tab"
+                data-bs-toggle="tab"
+                href="#todo-section"
+                role="tab"
+                aria-controls="todo-section"
+                aria-expanded="true"
+                >TO DO LIST</a
+              >
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                id="chats-tab"
+                data-bs-toggle="tab"
+                href="#chats-section"
+                role="tab"
+                aria-controls="chats-section"
+                >CHATS</a
+              >
+            </li>
+          </ul>
+          <div class="tab-content" id="setting-content">
+            <div
+              class="tab-pane fade show active scroll-wrapper"
+              id="todo-section"
+              role="tabpanel"
+              aria-labelledby="todo-section"
+            >
+              <div class="add-items d-flex px-3 mb-0">
+                <form class="form w-100">
+                  <div class="form-group d-flex">
+                    <input
+                      type="text"
+                      class="form-control todo-list-input"
+                      placeholder="Add To-do"
+                    />
+                    <button
+                      type="submit"
+                      class="add btn btn-primary todo-list-add-btn"
+                      id="add-task"
+                    >
+                      Add
+                    </button>
+                  </div>
+                </form>
+              </div>
+              <div class="list-wrapper px-3">
+                <ul class="d-flex flex-column-reverse todo-list">
+                  <li>
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input class="checkbox" type="checkbox" />
+                        Team review meeting at 3.00 PM
+                      </label>
+                    </div>
+                    <i class="remove ti-close"></i>
+                  </li>
+                  <li>
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input class="checkbox" type="checkbox" />
+                        Prepare for presentation
+                      </label>
+                    </div>
+                    <i class="remove ti-close"></i>
+                  </li>
+                  <li>
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input class="checkbox" type="checkbox" />
+                        Resolve all the low priority tickets due today
+                      </label>
+                    </div>
+                    <i class="remove ti-close"></i>
+                  </li>
+                  <li class="completed">
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input class="checkbox" type="checkbox" checked />
+                        Schedule meeting for next week
+                      </label>
+                    </div>
+                    <i class="remove ti-close"></i>
+                  </li>
+                  <li class="completed">
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input class="checkbox" type="checkbox" checked />
+                        Project review
+                      </label>
+                    </div>
+                    <i class="remove ti-close"></i>
+                  </li>
+                </ul>
+              </div>
+              <h4 class="px-3 text-muted mt-5 fw-light mb-0">Events</h4>
+              <div class="events pt-4 px-3">
+                <div class="wrapper d-flex mb-2">
+                  <i class="ti-control-record text-primary me-2"></i>
+                  <span>Feb 11 2018</span>
+                </div>
+                <p class="mb-0 fw-thin text-gray">
+                  Creating component page build a js
+                </p>
+                <p class="text-gray mb-0">build a js based app</p>
+              </div>
+              <div class="events pt-4 px-3">
+                <div class="wrapper d-flex mb-2">
+                  <i class="ti-control-record text-primary me-2"></i>
+                  <span>Feb 7 2018</span>
+                </div>
+                <p class="mb-0 fw-thin text-gray">Meeting with Alisa</p>
+                <p class="text-gray mb-0">Call Sarah Graves</p>
+              </div>
+            </div>
+            <!-- To do section tab ends -->
+            <div
+              class="tab-pane fade"
+              id="chats-section"
+              role="tabpanel"
+              aria-labelledby="chats-section"
+            >
+              <div
+                class="d-flex align-items-center justify-content-between border-bottom"
+              >
+                <p
+                  class="settings-heading border-top-0 mb-3 pl-3 pt-0 border-bottom-0 pb-0"
+                >
+                  Friends
+                </p>
+                <small
+                  class="settings-heading border-top-0 mb-3 pt-0 border-bottom-0 pb-0 pr-3 fw-normal"
+                  >See All</small
+                >
+              </div>
+              <ul class="chat-list">
+                <li class="list active">
+                  <div class="profile">
+                    <img
+                      src="/assets/images/faces/face1.jpg"
+                      alt="image"
+                    /><span class="online"></span>
+                  </div>
+                  <div class="info">
+                    <p>Thomas Douglas</p>
+                    <p>Available</p>
+                  </div>
+                  <small class="text-muted my-auto">19 min</small>
+                </li>
+                <li class="list">
+                  <div class="profile">
+                    <img
+                      src="/assets/images/faces/face2.jpg"
+                      alt="image"
+                    /><span class="offline"></span>
+                  </div>
+                  <div class="info">
+                    <div class="wrapper d-flex">
+                      <p>Catherine</p>
+                    </div>
+                    <p>Away</p>
+                  </div>
+                  <div class="badge badge-success badge-pill my-auto mx-2">
+                    4
+                  </div>
+                  <small class="text-muted my-auto">23 min</small>
+                </li>
+                <li class="list">
+                  <div class="profile">
+                    <img
+                      src="/assets/images/faces/face3.jpg"
+                      alt="image"
+                    /><span class="online"></span>
+                  </div>
+                  <div class="info">
+                    <p>Daniel Russell</p>
+                    <p>Available</p>
+                  </div>
+                  <small class="text-muted my-auto">14 min</small>
+                </li>
+                <li class="list">
+                  <div class="profile">
+                    <img
+                      src="/assets/images/faces/face4.jpg"
+                      alt="image"
+                    /><span class="offline"></span>
+                  </div>
+                  <div class="info">
+                    <p>James Richardson</p>
+                    <p>Away</p>
+                  </div>
+                  <small class="text-muted my-auto">2 min</small>
+                </li>
+                <li class="list">
+                  <div class="profile">
+                    <img
+                      src="/assets/images/faces/face5.jpg"
+                      alt="image"
+                    /><span class="online"></span>
+                  </div>
+                  <div class="info">
+                    <p>Madeline Kennedy</p>
+                    <p>Available</p>
+                  </div>
+                  <small class="text-muted my-auto">5 min</small>
+                </li>
+                <li class="list">
+                  <div class="profile">
+                    <img
+                      src="/assets/images/faces/face6.jpg"
+                      alt="image"
+                    /><span class="online"></span>
+                  </div>
+                  <div class="info">
+                    <p>Sarah Graves</p>
+                    <p>Available</p>
+                  </div>
+                  <small class="text-muted my-auto">47 min</small>
+                </li>
+              </ul>
+            </div>
+            <!-- chat tab ends -->
+          </div>
+        </div>
+        <!-- partial -->
+        <!-- partial:partials/_sidebar.html -->
+        <nav class="sidebar sidebar-offcanvas" id="sidebar">
+          <ul class="nav">
+            <li class="nav-item">
+              <a class="nav-link" href="/dashboard">
+                <i class="mdi mdi-grid-large menu-icon"></i>
+                <span class="menu-title">Dashboard</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/dashboard">
+                <i class="mdi mdi-grid-large menu-icon"></i>
+                <span class="menu-title">Customer Sentiment</span>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link" href="/dashboard">
+                <i class="mdi mdi-grid-large menu-icon"></i>
+                <span class="menu-title">Supplier Review</span>
+              </a>
+            </li>
+       
+
+            <li class="nav-item">
+              <a class="nav-link" href="/dashboard">
+                <i class="mdi mdi-grid-large menu-icon"></i>
+                <span class="menu-title">Engagement Matrics</span>
+              </a>
+            </li>
+       
+            <li class="nav-item">
+              <a class="nav-link" href="/dashboard">
+                <i class="mdi mdi-grid-large menu-icon"></i>
+                <span class="menu-title">Perfomance Benchmark</span>
+              </a>
+            </li>
+       
+            <li class="nav-item">
+              <a class="nav-link" href="/dashboard">
+                <i class="mdi mdi-grid-large menu-icon"></i>
+                <span class="menu-title">Market Trend</span>
+              </a>
+            </li>
+       
+
+       
+          </ul>
+        </nav>
+        <!-- partial -->
+
+<div class="main-panel">
+<div class="content-wrapper">
+
+<!-- ================= KPI CARDS ================= -->
+
+<div class="row">
+
+<div class="col-md-2 mb-3">
+<div class="card bg-primary text-white shadow-sm">
+<div class="card-body text-center">
+<h6>Total Suppliers</h6>
+<h3 class="fw-bold">{{ total_suppliers }}</h3>
+</div>
+</div>
+</div>
+
+<div class="col-md-2 mb-3">
+<div class="card bg-success text-white shadow-sm">
+<div class="card-body text-center">
+<h6>Active Suppliers</h6>
+<h3 class="fw-bold">{{ active_suppliers }}</h3>
+</div>
+</div>
+</div>
+
+<div class="col-md-2 mb-3">
+<div class="card bg-info text-white shadow-sm">
+<div class="card-body text-center">
+<h6>Total Customers</h6>
+<h3 class="fw-bold">{{ total_customers }}</h3>
+</div>
+</div>
+</div>
+
+<div class="col-md-2 mb-3">
+<div class="card bg-warning text-dark shadow-sm">
+<div class="card-body text-center">
+<h6>Total Deliveries</h6>
+<h3 class="fw-bold">{{ total_deliveries }}</h3>
+</div>
+</div>
+</div>
+
+<div class="col-md-2 mb-3">
+<div class="card bg-secondary text-white shadow-sm">
+<div class="card-body text-center">
+<h6>Inventory Items</h6>
+<h3 class="fw-bold">{{ inventory_count }}</h3>
+</div>
+</div>
+</div>
+
+<div class="col-md-2 mb-3">
+<div class="card bg-danger text-white shadow-sm">
+<div class="card-body text-center">
+<h6>Complaints</h6>
+<h3 class="fw-bold">{{ total_complaints }}</h3>
+</div>
+</div>
+</div>
+
+</div>
+
+<!-- ================= CHARTS ================= -->
+
+<div class="row">
+
+<div class="col-lg-4 mb-4">
+<div class="card shadow-sm">
+<div class="card-body">
+<h5>Supplier Sentiment</h5>
+<canvas id="sentimentChart"></canvas>
+</div>
+</div>
+</div>
+
+<div class="col-lg-4 mb-4">
+<div class="card shadow-sm">
+<div class="card-body">
+<h5>Delivery Performance</h5>
+<canvas id="deliveryChart"></canvas>
+</div>
+</div>
+</div>
+
+<div class="col-lg-4 mb-4">
+<div class="card shadow-sm">
+<div class="card-body">
+<h5>Inventory Categories</h5>
+<canvas id="inventoryChart"></canvas>
+</div>
+</div>
+</div>
+
+</div>
+
+<!-- ================= PREDICTIONS ================= -->
+
+<div class="row">
+
+<div class="col-lg-6 mb-4">
+<div class="card shadow-sm">
+<div class="card-body">
+<h5>Customer Churn Prediction</h5>
+<canvas id="churnChart"></canvas>
+</div>
+</div>
+</div>
+
+<div class="col-lg-6 mb-4">
+<div class="card shadow-sm">
+<div class="card-body">
+<h5>Market Trend Analysis</h5>
+<canvas id="marketTrendChart"></canvas>
+</div>
+</div>
+</div>
+
+</div>
+
+<!-- ================= TABLE SECTION ================= -->
+
+<div class="container-fluid mt-4">
+<div class="row g-4">
+
+<!-- SUPPLIER PERFORMANCE -->
+
+<div class="col-lg-6">
+
+<div class="card shadow-sm h-100">
+<div class="card-header bg-dark text-white">
+<h5 class="mb-0">Supplier Performance</h5>
+</div>
+
+<div class="card-body">
+
+<table id="suppliersTable" class="table table-bordered table-striped">
+
+<thead>
+<tr>
+<th>Supplier</th>
+<th>Timeliness</th>
+<th>Quality</th>
+<th>Risk</th>
+<th>Score</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for s in supplier_scores %}
+
+<tr>
+
+<td>{{ s.supplier.name }}</td>
+
+<td class="{% if s.timeliness_score >= 80 %} bg-success text-white {% elif s.timeliness_score >= 50 %} bg-warning text-dark {% else %} bg-danger text-white {% endif %}">
+{{ s.timeliness_score }}
+</td>
+
+<td class="{% if s.quality_score >= 80 %} bg-success text-white {% elif s.quality_score >= 50 %} bg-warning text-dark {% else %} bg-danger text-white {% endif %}">
+{{ s.quality_score }}
+</td>
+
+<td class="{% if s.risk_index >= 80 %} bg-danger text-white {% elif s.risk_index >= 50 %} bg-warning text-dark {% else %} bg-success text-white {% endif %}">
+{{ s.risk_index }}
+</td>
+
+<td class="bg-info text-white">
+{{ s.final_score }}
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+</div>
+
+</div>
+
+<!-- DELIVERY PERFORMANCE -->
+
+<div class="col-lg-6">
+
+<div class="card shadow-sm h-100">
+<div class="card-header bg-primary text-white">
+<h5 class="mb-0">Delivery Performance</h5>
+</div>
+
+<div class="card-body">
+
+<table id="deliveryTable" class="table table-bordered table-striped">
+
+<thead>
+<tr>
+<th>Supplier</th>
+<th>Status</th>
+<th>Condition</th>
+<th>Date</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for d in deliveries %}
+
+<tr>
+
+<td>{{ d.supplier.name }}</td>
+
+<td class="{% if d.delivery_status == 'ON_TIME' %} bg-success text-white {% elif d.delivery_status == 'LATE' %} bg-warning text-dark {% else %} bg-danger text-white {% endif %}">
+{{ d.delivery_status }}
+</td>
+
+<td class="{% if d.condition_status == 'GOOD' %} bg-success text-white {% elif d.condition_status == 'MINOR_DAMAGE' %} bg-warning text-dark {% else %} bg-danger text-white {% endif %}">
+{{ d.condition_status }}
+</td>
+
+<td>{{ d.delivery_date }}</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+</div>
+
+</div>
+
+<!-- CUSTOMER REVIEWS -->
+
+<div class="col-lg-6">
+
+<div class="card shadow-sm h-100">
+<div class="card-header bg-success text-white">
+<h5 class="mb-0">Customer Reviews</h5>
+</div>
+
+<div class="card-body">
+
+<table id="reviewsTable" class="table table-bordered table-striped">
+
+<thead>
+<tr>
+<th>Customer</th>
+<th>Brand</th>
+<th>Score</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for r in reviews %}
+
+<tr>
+
+<td>{{ r.customer.full_name }}</td>
+<td>{{ r.brand.name }}</td>
+
+<td class="{% if r.overall_weighted_score >= 4 %} bg-success text-white {% elif r.overall_weighted_score >= 2.5 %} bg-warning text-dark {% else %} bg-danger text-white {% endif %}">
+{{ r.overall_weighted_score }}
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+</div>
+
+</div>
+
+<!-- SENTIMENT -->
+
+<div class="col-lg-6">
+
+<div class="card shadow-sm h-100">
+<div class="card-header bg-warning text-dark">
+<h5 class="mb-0">Supplier Sentiment Analysis</h5>
+</div>
+
+<div class="card-body">
+
+<table id="sentimentTable" class="table table-bordered table-striped">
+
+<thead>
+<tr>
+<th>Supplier</th>
+<th>Sentiment</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for s in sentiments %}
+
+<tr>
+
+<td>{{ s.supplier.name }}</td>
+
+<td class="{% if s.sentiment_label == 'Positive' %} bg-success text-white {% elif s.sentiment_label == 'Neutral' %} bg-warning text-dark {% else %} bg-danger text-white {% endif %}">
+{{ s.sentiment_label }}
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+</div>
+
+</div>
+
+<!-- COMPLAINTS -->
+
+<div class="col-lg-12">
+
+<div class="card shadow-sm">
+
+<div class="card-header bg-danger text-white">
+<h5 class="mb-0">Supplier Complaints</h5>
+</div>
+
+<div class="card-body">
+
+<table id="complaintsTable" class="table table-bordered table-striped">
+
+<thead>
+<tr>
+<th>Supplier</th>
+<th>Severity</th>
+<th>Status</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for c in complaints %}
+
+<tr>
+
+<td>{{ c.supplier.name }}</td>
+
+<td class="{% if c.severity_level >= 8 %} bg-danger text-white {% elif c.severity_level >= 5 %} bg-warning text-dark {% else %} bg-success text-white {% endif %}">
+{{ c.severity_level }}
+</td>
+
+<td class="{% if c.resolved %} bg-success text-white {% else %} bg-warning text-dark {% endif %}">
+{% if c.resolved %}Resolved{% else %}Open{% endif %}
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+</div>
+
+<!-- FOOTER -->
+
+<footer class="footer">
+
+<div class="d-sm-flex justify-content-center justify-content-sm-between">
+
+<span class="text-muted">
+SupplyInsights Dashboard
+</span>
+
+<span>
+© 2026 All Rights Reserved
+</span>
+
+</div>
+
+</footer>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <script src="assets/vendors/js/vendor.bundle.base.js"></script>
+    <script src="assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js"></script>
+    <!-- endinject -->
+    <!-- Plugin js for this page-->
+
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <!-- End plugin js for this page-->
+    <!-- inject:js -->
+    <script src="assets/js/off-canvas.js"></script>
+    <script src="assets/js/hoverable-collapse.js"></script>
+    <script src="assets/js/template.js"></script>
+    <script src="assets/js/settings.js"></script>
+    <script src="assets/js/todolist.js"></script>
+
+<script>
+
+$(document).ready(function(){
+
+const tableButtons = [
+{ extend:"copy", className:"btn btn-secondary btn-sm" },
+{ extend:"excel", className:"btn btn-success btn-sm" },
+{ extend:"csv", className:"btn btn-primary btn-sm" },
+{ extend:"pdf", className:"btn btn-danger btn-sm" },
+{ extend:"print", className:"btn btn-dark btn-sm" }
+];
+
+function initTable(id){
+
+if($(id).length){
+
+$(id).DataTable({
+pageLength:10,
+lengthMenu:[10,20,50,100],
+dom:"Bfrtip",
+buttons:tableButtons
+});
+
+}
+
+}
+
+initTable("#deliveryTable");
+initTable("#suppliersTable");
+initTable("#reviewsTable");
+initTable("#complaintsTable");
+initTable("#sentimentTable");
+
+});
+
+</script>
+
+<!-- Charts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Calendar -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function(){
+
+// =========================
+// SAFE CHART CREATOR
+// =========================
+
+function createChart(id, type, labels, data){
+
+const canvas = document.getElementById(id);
+
+if(!canvas) return;
+
+new Chart(canvas, {
+
+type: type,
+
+data: {
+
+labels: labels,
+
+datasets: [{
+
+data: data,
+
+backgroundColor: [
+
+'rgba(75,192,192,0.7)',
+
+'rgba(255,206,86,0.7)',
+
+'rgba(255,99,132,0.7)',
+
+'rgba(54,162,235,0.7)'
+
+],
+
+borderWidth:1
+
+}]
+
+},
+
+options: {
+
+responsive:true,
+
+plugins:{
+
+legend:{ position:'top'}
+
+}
+
+}
+
+});
+
+}
+
+
+
+// =========================
+// CHARTS
+// =========================
+
+createChart(
+
+"sentimentChart",
+
+"doughnut",
+
+["Positive","Neutral","Negative"],
+
+[
+
+{{ positive_sentiments|default:0 }},
+
+{{ neutral_sentiments|default:0 }},
+
+{{ negative_sentiments|default:0 }}
+
+]
+
+);
+
+
+
+createChart(
+
+"deliveryChart",
+
+"bar",
+
+{{ delivery_labels|safe }},
+
+{{ delivery_values|safe }}
+
+);
+
+
+
+createChart(
+
+"inventoryChart",
+
+"pie",
+
+{{ inventory_chart_labels|safe }},
+
+{{ inventory_chart_values|safe }}
+
+);
+
+
+
+createChart(
+
+"churnChart",
+
+"bar",
+
+{{ churn_labels|safe }},
+
+{{ churn_values|safe }}
+
+);
+
+
+
+createChart(
+
+"marketTrendChart",
+
+"line",
+
+{{ trend_labels|safe }},
+
+{{ trend_values|safe }}
+
+);
+
+
+
+createChart(
+
+"indicatorChart",
+
+"doughnut",
+
+{{ indicator_labels|safe }},
+
+{{ indicator_values|safe }}
+
+);
+
+
+
+// =========================
+// FULL CALENDAR
+// =========================
+
+const calendarEl = document.getElementById("calendar");
+
+if(calendarEl){
+
+const calendar = new FullCalendar.Calendar(calendarEl,{
+
+initialView:'dayGridMonth',
+
+events: {{ calendar_events|safe }}
+
+});
+
+calendar.render();
+
+}
+
+
+
+// =========================
+// DATATABLES
+// =========================
+
+
+});
+
+</script>
+
+
+  </body>
+
+  <!-- Mirrored from demo.bootstrapdash.com/star-admin-2-pro/themes/vertical-icon-menu/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 13 Jan 2026 10:19:17 GMT -->
+</html>

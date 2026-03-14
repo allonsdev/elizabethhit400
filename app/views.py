@@ -50,6 +50,18 @@ from .models import (
     MarketTrend
 )
 
+from django.shortcuts import render
+from .models import Review, SentimentAnalysis, CustomerProfile
+from django.db.models import Avg, Max, Min
+from django.shortcuts import render
+from django.db.models import Sum, Count, F, ExpressionWrapper, DecimalField
+from .models import InventoryItem, Delivery
+from django.shortcuts import render
+from django.db.models import Sum, Count, Avg, F, ExpressionWrapper, DecimalField
+from django.db.models.functions import TruncMonth
+from .models import InventoryItem, Delivery
+
+
 
 def admin_dashboard(request):
     now = timezone.now()
@@ -209,8 +221,343 @@ def admin_dashboard(request):
         "avg_market_risk": round(avg_market_risk, 2),
     }
 
-    return render(request, "admin/dashboard.html", context)
+    return render(request, "dashboard.html", context)
 
+
+
+
+
+from django.shortcuts import render
+from django.db.models import Count, Avg, Sum
+from django.db.models.functions import TruncMonth
+import json
+
+from .models import (
+    VisitorLog, Supplier, SupplierPerformanceScore, SupplierSentiment,
+    Customer, CustomerProfile, FastFoodBrand, Review, SentimentAnalysis,
+    EngagementMetric, InventoryItem, Delivery, Complaint,
+    SupplierReview, Benchmark, MarketTrend, MarketIndicator,
+    ScrapedMarketSource, CompetitorMarketData, DecisionRecommendation
+)
+
+
+import json
+from django.shortcuts import render
+from django.db.models import Count, Avg, Sum
+
+
+def dashboard(request):
+
+    context = {}
+
+    # -------------------------------------------------
+    # VISITOR ANALYTICS
+    # -------------------------------------------------
+
+    context["total_visits"] = VisitorLog.objects.count()
+
+    context["unique_visitors"] = (
+        VisitorLog.objects.values("ip_address").distinct().count()
+    )
+
+    context["top_pages"] = (
+        VisitorLog.objects.values("path")
+        .annotate(visits=Count("id"))
+        .order_by("-visits")[:10]
+    )
+
+    context["top_locations"] = (
+        VisitorLog.objects.values("location")
+        .annotate(count=Count("id"))
+        .order_by("-count")[:5]
+    )
+
+    # -------------------------------------------------
+    # SUPPLIER ANALYTICS
+    # -------------------------------------------------
+
+    context["total_suppliers"] = Supplier.objects.count()
+    context["active_suppliers"] = Supplier.objects.filter(is_active=True).count()
+    context["inactive_suppliers"] = Supplier.objects.filter(is_active=False).count()
+    context["suppliers"] = Supplier.objects.all()
+
+    # -------------------------------------------------
+    # SUPPLIER PERFORMANCE
+    # -------------------------------------------------
+
+    scores = SupplierPerformanceScore.objects.select_related("supplier")
+
+    context["supplier_scores"] = scores
+
+    context["avg_supplier_score"] = scores.aggregate(
+        avg=Avg("final_score")
+    )["avg"]
+
+    context["excellent_suppliers"] = scores.filter(
+        rating_category="Excellent"
+    ).count()
+
+    context["good_suppliers"] = scores.filter(
+        rating_category="Good"
+    ).count()
+
+    context["average_suppliers"] = scores.filter(
+        rating_category="Average"
+    ).count()
+
+    context["poor_suppliers"] = scores.filter(
+        rating_category="Poor"
+    ).count()
+
+    # -------------------------------------------------
+    # SUPPLIER SENTIMENT ANALYSIS
+    # -------------------------------------------------
+
+    sentiment_counts = (
+        SupplierSentiment.objects.values("sentiment_label")
+        .annotate(count=Count("id"))
+    )
+
+    positive = neutral = negative = 0
+
+    for s in sentiment_counts:
+        if s["sentiment_label"] == "Positive":
+            positive = s["count"]
+        elif s["sentiment_label"] == "Neutral":
+            neutral = s["count"]
+        elif s["sentiment_label"] == "Negative":
+            negative = s["count"]
+
+    context["positive_sentiments"] = positive
+    context["neutral_sentiments"] = neutral
+    context["negative_sentiments"] = negative
+
+    context["sentiments"] = SupplierSentiment.objects.select_related("supplier")[:100]
+
+    # -------------------------------------------------
+    # CUSTOMER ANALYTICS
+    # -------------------------------------------------
+
+    context["total_customers"] = Customer.objects.count()
+
+    context["avg_lifetime_value"] = Customer.objects.aggregate(
+        avg=Avg("lifetime_value")
+    )["avg"]
+
+    context["avg_churn"] = Customer.objects.aggregate(
+        avg=Avg("churn_probability")
+    )["avg"]
+
+    context["avg_engagement"] = Customer.objects.aggregate(
+        avg=Avg("engagement_score")
+    )["avg"]
+
+    # -------------------------------------------------
+    # CUSTOMER CHURN CHART
+    # -------------------------------------------------
+
+    churn_labels = ["Low Risk", "Medium Risk", "High Risk"]
+
+    low = Customer.objects.filter(churn_probability__lt=0.3).count()
+
+    medium = Customer.objects.filter(
+        churn_probability__gte=0.3,
+        churn_probability__lt=0.7
+    ).count()
+
+    high = Customer.objects.filter(
+        churn_probability__gte=0.7
+    ).count()
+
+    context["churn_labels"] = json.dumps(churn_labels)
+    context["churn_values"] = json.dumps([low, medium, high])
+
+    # -------------------------------------------------
+    # CUSTOMER PROFILE ANALYTICS
+    # -------------------------------------------------
+
+    context["total_profiles"] = CustomerProfile.objects.count()
+
+    context["profiles_by_location"] = (
+        CustomerProfile.objects.values("location")
+        .annotate(count=Count("id"))
+        .order_by("-count")[:10]
+    )
+
+    # -------------------------------------------------
+    # FAST FOOD BRAND ANALYTICS
+    # -------------------------------------------------
+
+    context["total_brands"] = FastFoodBrand.objects.count()
+    context["brands"] = FastFoodBrand.objects.all()
+
+    # -------------------------------------------------
+    # REVIEW ANALYTICS
+    # -------------------------------------------------
+
+    context["total_reviews"] = Review.objects.count()
+
+    context["avg_review_score"] = Review.objects.aggregate(
+        avg=Avg("overall_weighted_score")
+    )["avg"]
+
+    context["reviews"] = Review.objects.select_related("brand", "customer")[:100]
+
+    # -------------------------------------------------
+    # ENGAGEMENT METRICS
+    # -------------------------------------------------
+
+    engagement = EngagementMetric.objects.select_related("customer")
+
+    context["engagement_records"] = engagement.count()
+
+    context["total_page_views"] = engagement.aggregate(
+        total=Sum("page_views")
+    )["total"]
+
+    context["total_clicks"] = engagement.aggregate(
+        total=Sum("clicks")
+    )["total"]
+
+    context["avg_loyalty_index"] = engagement.aggregate(
+        avg=Avg("loyalty_index")
+    )["avg"]
+
+    # Engagement Calendar
+
+    events = []
+
+    for e in engagement:
+        events.append({
+            "title": f"{e.customer.full_name} Engagement",
+            "start": e.recorded_month.strftime("%Y-%m-%d")
+        })
+
+    context["calendar_events"] = json.dumps(events)
+
+    # -------------------------------------------------
+    # INVENTORY ANALYTICS
+    # -------------------------------------------------
+
+    inventory = InventoryItem.objects.all()
+
+    context["inventory_items"] = inventory
+    context["inventory_count"] = inventory.count()
+
+    context["low_stock_items"] = inventory.filter(
+        quantity_in_stock__lte=5
+    ).count()
+
+    inventory_by_category = (
+        inventory.values("category")
+        .annotate(count=Count("id"))
+    )
+
+    context["inventory_chart_labels"] = json.dumps(
+        [i["category"] for i in inventory_by_category]
+    )
+
+    context["inventory_chart_values"] = json.dumps(
+        [i["count"] for i in inventory_by_category]
+    )
+
+    # -------------------------------------------------
+    # DELIVERY ANALYTICS
+    # -------------------------------------------------
+
+    deliveries = Delivery.objects.select_related("supplier")
+
+    context["deliveries"] = deliveries
+    context["total_deliveries"] = deliveries.count()
+
+    delivery_chart = (
+        deliveries.values("delivery_status")
+        .annotate(count=Count("id"))
+    )
+
+    context["delivery_labels"] = json.dumps(
+        [d["delivery_status"] for d in delivery_chart]
+    )
+
+    context["delivery_values"] = json.dumps(
+        [d["count"] for d in delivery_chart]
+    )
+
+    # -------------------------------------------------
+    # COMPLAINT ANALYTICS
+    # -------------------------------------------------
+
+    complaints = Complaint.objects.select_related("supplier")
+
+    context["complaints"] = complaints
+    context["total_complaints"] = complaints.count()
+
+    # -------------------------------------------------
+    # MARKET TREND ANALYTICS
+    # -------------------------------------------------
+
+# -------------------------------------------------
+# MARKET TREND ANALYTICS
+# -------------------------------------------------
+
+    trends = MarketTrend.objects.all()
+
+    context["trends"] = trends
+    context["market_trends"] = trends.count()
+
+    trend_chart = (
+        MarketTrend.objects.values("trend_title")
+        .annotate(count=Count("id"))
+    )
+
+    context["trend_labels"] = json.dumps(
+        [t["trend_title"] for t in trend_chart]
+    )
+
+    context["trend_values"] = json.dumps(
+        [t["count"] for t in trend_chart]
+    )
+    # -------------------------------------------------
+    # MARKET INDICATORS
+    # -------------------------------------------------
+
+    indicators = MarketIndicator.objects.all()
+
+    context["market_indicators"] = indicators
+    context["indicator_count"] = indicators.count()
+
+    indicator_chart = (
+        MarketIndicator.objects.values("indicator_name")
+        .annotate(count=Count("id"))
+    )
+
+    context["indicator_labels"] = json.dumps(
+        [i["indicator_name"] for i in indicator_chart]
+    )
+
+    context["indicator_values"] = json.dumps(
+        [i["count"] for i in indicator_chart]
+    )
+
+    # -------------------------------------------------
+    # COMPETITOR DATA
+    # -------------------------------------------------
+
+    competitors = CompetitorMarketData.objects.all()
+
+    context["competitors"] = competitors
+    context["competitor_count"] = competitors.count()
+
+    # -------------------------------------------------
+    # AI DECISION REPORTS
+    # -------------------------------------------------
+
+    decisions = DecisionRecommendation.objects.all()
+
+    context["decision_reports"] = decisions
+    context["decision_count"] = decisions.count()
+
+    return render(request, "index.html", context)
 
 def home_view(request):
     return render(request, "home.html")
@@ -231,10 +578,228 @@ def supplier_management(request):
     suppliers = Supplier.objects.all().order_by("name")
     return render(request, "supplier_manage.html", {"suppliers": suppliers})
 
+from django.db.models.functions import TruncDate
+from django.db.models import Count, Q
+
+def customerdashboard(request):
+    reviews = Review.objects.select_related('customer','brand')
+    sentiments = SentimentAnalysis.objects.select_related('review__customer','review__brand')
+    customers = CustomerProfile.objects.all()
+
+    total_entries = reviews.count()
+    total_customers = customers.count()
+
+    highest_positive = sentiments.aggregate(Max('final_sentiment_score'))['final_sentiment_score__max']
+    highest_negative = sentiments.aggregate(Min('final_sentiment_score'))['final_sentiment_score__min']
 
 
+    # SENTIMENT DISTRIBUTION
+    sentiment_counts = sentiments.values('sentiment_label').annotate(count=Count('id'))
+
+    positive = 0
+    neutral = 0
+    negative = 0
+
+    positive = sentiments.filter(final_sentiment_score__gt=0).count()
+
+    negative = sentiments.filter(final_sentiment_score__lt=0).count()
+
+    neutral = sentiments.filter(final_sentiment_score=0).count()
+
+    print(negative)
+    # REVIEWS OVER TIME
+    review_trend = reviews.annotate(
+        date=TruncDate('created_at')
+    ).values('date').annotate(
+        count=Count('id')
+    ).order_by('date')
 
 
+    trend_dates = [str(r['date']) for r in review_trend]
+    trend_counts = [r['count'] for r in review_trend]
+
+
+    context = {
+
+        "reviews": reviews,
+        "sentiments": sentiments,
+        "customers": customers,
+
+        "total_entries": total_entries,
+        "total_customers": total_customers,
+        "highest_positive": highest_positive,
+        "highest_negative": highest_negative,
+
+        # chart data
+        "positive": positive,
+        "neutral": neutral,
+        "negative": negative,
+        "trend_dates": trend_dates,
+        "trend_counts": trend_counts,
+    }
+    return render(request, "customerdashboard.html",context)
+
+
+from django.db.models import Avg, Count
+from .models import *
+
+def supplierdashboard(request):
+
+    total_suppliers = Supplier.objects.count()
+
+    avg_score = SupplierPerformanceScore.objects.aggregate(
+        Avg("final_score")
+    )["final_score__avg"]
+
+    total_deliveries = Delivery.objects.count()
+
+    total_complaints = Complaint.objects.count()
+
+    supplier_scores = SupplierPerformanceScore.objects.select_related("supplier").order_by("-final_score")
+
+    best_supplier = supplier_scores.first().supplier.name
+
+    risky_supplier = SupplierPerformanceScore.objects.order_by("-risk_index").first().supplier.name
+
+    complaint_supplier = Complaint.objects.values("supplier__name").annotate(
+        c=Count("id")
+    ).order_by("-c").first()
+
+    context = {
+        "total_suppliers": total_suppliers,
+        "avg_score": round(avg_score,2),
+        "total_deliveries": total_deliveries,
+        "total_complaints": total_complaints,
+        "supplier_scores": supplier_scores,
+        "best_supplier": best_supplier,
+        "risky_supplier": risky_supplier,
+            "suppliers": Supplier.objects.all(),
+    "deliveries": Delivery.objects.all(),
+    "reviews": SupplierReview.objects.all(),
+    "complaints": Complaint.objects.all(),
+        "complaint_supplier": complaint_supplier["supplier__name"],
+    }
+
+    return render(request,"supplierdashboard.html",context)
+def inventory(request):
+    inventory = InventoryItem.objects.select_related("supplier")
+    deliveries = Delivery.objects.select_related("supplier")
+
+    # INVENTORY STATS
+    total_products = inventory.count()
+
+    total_stock = inventory.aggregate(
+        Sum("quantity_in_stock")
+    )["quantity_in_stock__sum"] or 0
+
+    low_stock_items = inventory.filter(
+        quantity_in_stock__lte=F("reorder_level")
+    ).count()
+
+    active_products = inventory.filter(is_active=True).count()
+
+    inactive_products = inventory.filter(is_active=False).count()
+
+    inventory_value = inventory.aggregate(
+        total=Sum(
+            ExpressionWrapper(
+                F("quantity_in_stock") * F("unit_cost"),
+                output_field=DecimalField()
+            )
+        )
+    )["total"] or 0
+
+    avg_selling_price = inventory.aggregate(
+        Avg("selling_price")
+    )["selling_price__avg"] or 0
+
+    # DELIVERY STATS
+    total_deliveries = deliveries.count()
+
+    on_time_deliveries = deliveries.filter(
+        delivery_status="ON_TIME"
+    ).count()
+
+    late_deliveries = deliveries.filter(
+        delivery_status="LATE"
+    ).count()
+
+    early_deliveries = deliveries.filter(
+        delivery_status="EARLY"
+    ).count()
+
+    damaged_goods = deliveries.filter(
+        condition_status="DAMAGED"
+    ).count()
+
+    partial_deliveries = deliveries.filter(
+        condition_status="PARTIAL"
+    ).count()
+
+    documentation_issues = deliveries.filter(
+        documentation_complete=False
+    ).count()
+
+    # SUPPLIER RANKING
+    top_suppliers = deliveries.values(
+        "supplier__name"
+    ).annotate(
+        deliveries_count=Count("id")
+    ).order_by("-deliveries_count")[:5]
+
+    context = {
+
+        "inventory": inventory,
+        "deliveries": deliveries,
+
+        # inventory stats
+        "total_products": total_products,
+        "total_stock": total_stock,
+        "low_stock_items": low_stock_items,
+        "active_products": active_products,
+        "inactive_products": inactive_products,
+        "inventory_value": inventory_value,
+        "avg_selling_price": avg_selling_price,
+
+        # delivery stats
+        "total_deliveries": total_deliveries,
+        "on_time_deliveries": on_time_deliveries,
+        "late_deliveries": late_deliveries,
+        "early_deliveries": early_deliveries,
+        "damaged_goods": damaged_goods,
+        "partial_deliveries": partial_deliveries,
+        "documentation_issues": documentation_issues,
+
+        "top_suppliers": top_suppliers,
+    }
+    return render(request, "inventory.html", context)
+
+def audit(request):
+
+    engagement = EngagementMetric.objects.all()
+    visitors = VisitorLog.objects.all()
+
+    context = {
+
+        "engagement_metrics": engagement,
+        "visitor_logs": visitors,
+
+        "total_visitors": visitors.count(),
+
+        "total_page_views": engagement.aggregate(
+            Sum("page_views")
+        )["page_views__sum"] or 0,
+
+        "total_clicks": engagement.aggregate(
+            Sum("clicks")
+        )["clicks__sum"] or 0,
+
+        "total_messages": engagement.aggregate(
+            Sum("messages_sent")
+        )["messages_sent__sum"] or 0,
+    }
+
+    return render(request, "audit.html", context)
 def customer_review_view(request):
     # ---------------------------------
     # 1️⃣ TRACK PAGE VIEW AUTOMATICALLY

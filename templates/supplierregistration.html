@@ -1,56 +1,222 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Supplier Registration</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-<div class="container py-4">
-    <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">Supplier Registration</h4>
-        </div>
-        <div class="card-body">
-            <form method="post">
-                {% csrf_token %}
-                <div class="mb-3">
-                    <label class="form-label">Supplier Name</label>
-                    <input type="text" class="form-control" name="name" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Company Name</label>
-                    <input type="text" class="form-control" name="company_name">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Supplier Code</label>
-                    <input type="text" class="form-control" name="supplier_code" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Contact Person</label>
-                    <input type="text" class="form-control" name="contact_person">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Phone</label>
-                    <input type="text" class="form-control" name="phone">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Email</label>
-                    <input type="email" class="form-control" name="email">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Location</label>
-                    <input type="text" class="form-control" name="location">
-                </div>
-                <div class="form-check mb-3">
-                    <input class="form-check-input" type="checkbox" name="is_active" id="is_active">
-                    <label class="form-check-label" for="is_active">Active Supplier</label>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Register Supplier</button>
-            </form>
-        </div>
+
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;800;900&family=Barlow+Condensed:wght@600;700;800;900&family=DM+Mono:wght@400;500&display=swap');
+  @import url('https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css');
+  :root{
+    --bg:#faf8f5;--bg2:#f3efe8;--bg3:#e8e0d2;
+    --acc:#c0392b;--acc2:#e85d04;--accL:#fff0ee;
+    --dark:#1a1512;--mid:#4a3f34;--soft:#8a7a6a;
+    --line:rgba(90,70,50,0.10);--line2:rgba(90,70,50,0.18);
+    --t1:#1a1512;--t2:#8a7a6a;--t3:#b8a48a;
+    --card:rgba(255,253,249,0.97);
+    --success:#16a34a;--warning:#d97706;--danger:#c0392b;
+    --radius:12px;--radius-sm:8px;
+    --shadow:0 1px 3px rgba(90,60,30,0.06),0 1px 2px rgba(90,60,30,0.04);
+    --shadow-md:0 4px 20px rgba(90,60,30,0.10);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--t1);font-size:14px;}
+  .wrap{max-width:640px;margin:0 auto;padding:2rem 1rem;}
+  .page-header{margin-bottom:1.75rem;}
+  .kpi-section-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--acc);display:flex;align-items:center;gap:8px;margin-bottom:.5rem;}
+  .kpi-section-label::after{content:'';flex:1;height:1px;background:var(--line);}
+  .page-header h2{font-family:'Barlow Condensed',sans-serif;font-size:1.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--t1);}
+  .page-header p{font-size:13px;color:var(--t2);margin-top:4px;}
+  .kpi-card{background:var(--card);border:1px solid var(--line2);border-radius:var(--radius);box-shadow:var(--shadow);}
+  .kpi-card-header{padding:.9rem 1.25rem;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;}
+  .kpi-card-header-icon{width:34px;height:34px;background:var(--accL);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;color:var(--acc);font-size:16px;flex-shrink:0;}
+  .kpi-card-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t1);}
+  .kpi-card-body{padding:1.5rem;}
+  .kpi-grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;}
+  .kpi-form-group{margin-bottom:1.25rem;}
+  .kpi-label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t2);margin-bottom:6px;font-family:'Barlow Condensed',sans-serif;}
+  .kpi-input,.kpi-select{width:100%;padding:10px 13px;border:1px solid var(--line2);border-radius:var(--radius-sm);font-size:14px;font-family:'Barlow',sans-serif;color:var(--t1);background:var(--card);transition:border-color .2s,box-shadow .2s;outline:none;}
+  .kpi-input:focus,.kpi-select:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(192,57,43,0.1);}
+  .kpi-input-group{display:flex;align-items:stretch;}
+  .kpi-input-icon{padding:10px 13px;background:var(--bg2);border:1px solid var(--line2);border-right:none;border-radius:var(--radius-sm) 0 0 var(--radius-sm);color:var(--t2);font-size:15px;display:flex;align-items:center;}
+  .kpi-input-group .kpi-input{border-radius:0 var(--radius-sm) var(--radius-sm) 0;}
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--bg2);border:1px solid var(--line2);border-radius:var(--radius-sm);}
+  .toggle-info{display:flex;flex-direction:column;gap:2px;}
+  .toggle-label{font-size:13px;font-weight:600;color:var(--t1);}
+  .toggle-hint{font-size:11px;color:var(--t2);}
+  .toggle-switch{position:relative;width:40px;height:22px;flex-shrink:0;}
+  .toggle-switch input{opacity:0;width:0;height:0;}
+  .toggle-slider{position:absolute;inset:0;background:var(--bg3);border-radius:22px;transition:.3s;cursor:pointer;}
+  .toggle-slider::before{content:'';position:absolute;height:16px;width:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.3s;}
+  .toggle-switch input:checked+.toggle-slider{background:var(--success);}
+  .toggle-switch input:checked+.toggle-slider::before{transform:translateX(18px);}
+  .form-divider{height:1px;background:var(--line);margin:1.5rem 0;}
+  .kpi-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 22px;border-radius:var(--radius-sm);font-size:12px;font-weight:700;border:none;cursor:pointer;transition:all .2s;font-family:'Barlow Condensed',sans-serif;letter-spacing:.06em;text-transform:uppercase;}
+  .kpi-btn-primary{background:var(--acc);color:#fff;width:100%;}
+  .kpi-btn-primary:hover{background:#a93226;box-shadow:0 4px 14px rgba(192,57,43,.3);}
+  .swal-toast-wrap{position:fixed;top:1rem;right:1rem;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+  .swal-toast{background:var(--card);border:1px solid var(--line2);border-radius:var(--radius);padding:14px 16px 14px 14px;box-shadow:var(--shadow-md);display:flex;align-items:flex-start;gap:10px;min-width:280px;max-width:360px;animation:toast-in .3s ease;font-family:'Barlow',sans-serif;}
+  .swal-toast.hiding{animation:toast-out .3s ease forwards;}
+  @keyframes toast-in{from{opacity:0;transform:translateX(18px);}to{opacity:1;transform:none;}}
+  @keyframes toast-out{from{opacity:1;transform:none;}to{opacity:0;transform:translateX(18px);}}
+  .toast-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+  .toast-icon.success{background:rgba(22,163,74,.1);color:var(--success);}
+  .toast-icon.error{background:rgba(192,57,43,.1);color:var(--danger);}
+  .toast-icon.warning{background:rgba(217,119,6,.1);color:var(--warning);}
+  .toast-icon.info{background:rgba(3,105,161,.1);color:#0369a1;}
+  .toast-body{flex:1;}
+  .toast-title{font-size:13px;font-weight:700;font-family:'Barlow Condensed',sans-serif;letter-spacing:.03em;color:var(--t1);}
+  .toast-msg{font-size:12px;color:var(--t2);margin-top:2px;}
+  .toast-close{width:20px;height:20px;border:none;background:none;cursor:pointer;color:var(--t3);font-size:14px;display:flex;align-items:center;justify-content:center;border-radius:4px;flex-shrink:0;}
+  .toast-close:hover{background:var(--bg2);color:var(--t2);}
+  .toast-progress{height:2px;background:var(--line);border-radius:0 0 var(--radius) var(--radius);overflow:hidden;margin:-0px -16px -14px -14px;}
+  .toast-progress-bar{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:0 0 var(--radius) var(--radius);transition:width linear;}
+  @media(max-width:560px){.kpi-grid-2{grid-template-columns:1fr;}}
+</style>
+
+<div class="swal-toast-wrap" id="toastWrap"></div>
+
+<div class="wrap">
+  <div class="page-header">
+    <div class="kpi-section-label">Supplier Management</div>
+    <h2>Register Supplier</h2>
+    <p>Add a new supplier to the KPI system</p>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-card-header">
+      <div class="kpi-card-header-icon"><i class="mdi mdi-truck-outline"></i></div>
+      <div>
+        <div class="kpi-card-title">Supplier Details</div>
+      </div>
     </div>
+    <div class="kpi-card-body">
+
+      <div class="kpi-section-label" style="margin-top:0;">Basic Info</div>
+
+      <div class="kpi-grid-2">
+        <div class="kpi-form-group">
+          <label class="kpi-label">Supplier Name *</label>
+          <div class="kpi-input-group">
+            <span class="kpi-input-icon"><i class="mdi mdi-account-outline"></i></span>
+            <input type="text" class="kpi-input" id="name" placeholder="e.g. John Dube" required>
+          </div>
+        </div>
+        <div class="kpi-form-group">
+          <label class="kpi-label">Company Name</label>
+          <div class="kpi-input-group">
+            <span class="kpi-input-icon"><i class="mdi mdi-domain"></i></span>
+            <input type="text" class="kpi-input" id="company_name" placeholder="e.g. Dube Supplies Ltd">
+          </div>
+        </div>
+      </div>
+
+      <div class="kpi-grid-2">
+        <div class="kpi-form-group">
+          <label class="kpi-label">Supplier Code *</label>
+          <div class="kpi-input-group">
+            <span class="kpi-input-icon"><i class="mdi mdi-barcode"></i></span>
+            <input type="text" class="kpi-input" id="supplier_code" placeholder="e.g. SUP-001" required>
+          </div>
+        </div>
+        <div class="kpi-form-group">
+          <label class="kpi-label">Contact Person</label>
+          <div class="kpi-input-group">
+            <span class="kpi-input-icon"><i class="mdi mdi-account-tie-outline"></i></span>
+            <input type="text" class="kpi-input" id="contact_person" placeholder="e.g. Jane Smith">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-divider"></div>
+      <div class="kpi-section-label">Contact & Location</div>
+
+      <div class="kpi-grid-2">
+        <div class="kpi-form-group">
+          <label class="kpi-label">Phone</label>
+          <div class="kpi-input-group">
+            <span class="kpi-input-icon"><i class="mdi mdi-phone-outline"></i></span>
+            <input type="text" class="kpi-input" id="phone" placeholder="+27 11 000 0000">
+          </div>
+        </div>
+        <div class="kpi-form-group">
+          <label class="kpi-label">Email</label>
+          <div class="kpi-input-group">
+            <span class="kpi-input-icon"><i class="mdi mdi-email-outline"></i></span>
+            <input type="email" class="kpi-input" id="email" placeholder="supplier@domain.com">
+          </div>
+        </div>
+      </div>
+
+      <div class="kpi-form-group">
+        <label class="kpi-label">Location</label>
+        <div class="kpi-input-group">
+          <span class="kpi-input-icon"><i class="mdi mdi-map-marker-outline"></i></span>
+          <input type="text" class="kpi-input" id="location" placeholder="e.g. Johannesburg, Gauteng">
+        </div>
+      </div>
+
+      <div class="form-divider"></div>
+      <div class="kpi-section-label">Status</div>
+
+      <div class="kpi-form-group">
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <span class="toggle-label">Active Supplier</span>
+            <span class="toggle-hint">Supplier will appear in delivery and review workflows</span>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="is_active" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-divider" style="margin-bottom:1.25rem;"></div>
+
+      <button class="kpi-btn kpi-btn-primary" onclick="handleSubmit()">
+        <i class="mdi mdi-truck-plus-outline"></i>
+        Register Supplier
+      </button>
+
+    </div>
+  </div>
 </div>
-</body>
-</html>
+
+<script>
+function showToast(type, title, msg, duration){
+  const icons={success:'mdi-check-circle-outline',error:'mdi-close-circle-outline',warning:'mdi-alert-outline',info:'mdi-information-outline'};
+  const wrap=document.getElementById('toastWrap');
+  const t=document.createElement('div');
+  t.className='swal-toast';
+  t.innerHTML=`
+    <div class="toast-icon ${type}"><i class="mdi ${icons[type]||icons.info}"></i></div>
+    <div class="toast-body">
+      <div class="toast-title">${title}</div>
+      ${msg?`<div class="toast-msg">${msg}</div>`:''}
+    </div>
+    <button class="toast-close" onclick="dismissToast(this.closest('.swal-toast'))">✕</button>
+    <div class="toast-progress"><div class="toast-progress-bar" id="pb_${Date.now()}" style="width:100%"></div></div>
+  `;
+  wrap.appendChild(t);
+  const pb=t.querySelector('.toast-progress-bar');
+  const dur=duration||4000;
+  pb.style.transition=`width ${dur}ms linear`;
+  setTimeout(()=>pb.style.width='0%',50);
+  setTimeout(()=>dismissToast(t),dur+100);
+}
+function dismissToast(el){
+  if(!el||el.classList.contains('hiding'))return;
+  el.classList.add('hiding');
+  setTimeout(()=>el.remove(),300);
+}
+function handleSubmit(){
+  const name=document.getElementById('name').value.trim();
+  const code=document.getElementById('supplier_code').value.trim();
+  if(!name){showToast('error','Supplier Name Required','Please enter the supplier name.');return;}
+  if(!code){showToast('error','Supplier Code Required','Please enter a unique supplier code.');return;}
+  const email=document.getElementById('email').value.trim();
+  if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showToast('warning','Invalid Email','Please enter a valid email address.');return;}
+  showToast('success','Supplier Registered',`${name} (${code}) has been added successfully.`,5000);
+  setTimeout(()=>{
+    document.querySelectorAll('.kpi-input').forEach(i=>i.value='');
+    document.getElementById('is_active').checked=true;
+  },500);
+}
+</script>

@@ -1,0 +1,227 @@
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Inter',Arial,sans-serif;background:#f1f5f9;}
+    .wrap{max-width:600px;margin:2rem auto;}
+    .header{background:linear-gradient(135deg,#ef4444,#dc2626);color:white;padding:2.5rem 2rem;border-radius:16px 16px 0 0;text-align:center;}
+    .header h1{font-size:1.4rem;font-weight:800;margin-bottom:6px;}
+    .header p{opacity:0.85;font-size:13px;}
+    .body{background:white;padding:2rem;}
+    .footer{background:#f8fafc;padding:1rem 2rem;border-radius:0 0 16px 16px;font-size:12px;color:#64748b;text-align:center;}
+    .detail-row{display:flex;align-items:flex-start;padding:10px 0;border-bottom:1px solid #f1f5f9;font-size:13px;}
+    .detail-label{min-width:140px;color:#64748b;font-weight:600;}
+    .detail-value{color:#0f172a;font-weight:500;}
+    .alert-box{background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-left:4px solid #ef4444;border-radius:8px;padding:14px 16px;margin:1.5rem 0;font-size:13px;color:#7f1d1d;line-height:1.6;}
+    .icon-circle{width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:28px;}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="icon-circle">⚠️</div>
+    <h1>Supplier Complaint Logged</h1>
+    <p>A complaint has been recorded against a supplier</p>
+  </div>
+  <div class="body">
+    <div class="alert-box">
+      <strong>Attention required:</strong> A complaint has been logged and requires review within 48 hours.
+    </div>
+
+    <div class="detail-row">
+      <span class="detail-label">Supplier</span>
+      <span class="detail-value">{{ complaint.supplier.name }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Company</span>
+      <span class="detail-value">{{ complaint.supplier.company_name }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Severity Level</span>
+      <span class="detail-value" style="color:{% if complaint.severity_level >= 8 %}#dc2626{% elif complaint.severity_level >= 5 %}#d97706{% else %}#059669{% endif%;font-weight:800;">{{ complaint.severity_level }}/10</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Status</span>
+      <span class="detail-value">{% if complaint.resolved %}Resolved{% else %}<strong style="color:#dc2626;">Open — Needs Action</strong>{% endif %}</span>
+    </div>
+    <div class="detail-row" style="border-bottom:none;align-items:flex-start;">
+      <span class="detail-label">Description</span>
+      <span class="detail-value" style="font-style:italic;">{{ complaint.description }}</span>
+    </div>
+
+    <p style="font-size:12px;color:#94a3b8;margin-top:1.5rem;">Logged at: {{ timestamp }}</p>
+  </div>
+  <div class="footer">SupplyInsight &copy; {% now "Y" %} — Automated notification. Do not reply.</div>
+</div>
+</body>
+</html>
+
+
+<!-- ═══════════════════════════════════════════════════
+     templates/emails/delivery_alert.html
+═══════════════════════════════════════════════════ -->
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Inter',Arial,sans-serif;background:#f1f5f9;}
+    .wrap{max-width:600px;margin:2rem auto;}
+    .header{background:linear-gradient(135deg,#f59e0b,#d97706);color:white;padding:2.5rem 2rem;border-radius:16px 16px 0 0;text-align:center;}
+    .header h1{font-size:1.4rem;font-weight:800;margin-bottom:6px;}
+    .header p{opacity:0.85;font-size:13px;}
+    .body{background:white;padding:2rem;}
+    .footer{background:#f8fafc;padding:1rem 2rem;border-radius:0 0 16px 16px;font-size:12px;color:#64748b;text-align:center;}
+    .detail-row{display:flex;align-items:flex-start;padding:10px 0;border-bottom:1px solid #f1f5f9;font-size:13px;}
+    .detail-label{min-width:160px;color:#64748b;font-weight:600;}
+    .detail-value{color:#0f172a;font-weight:500;}
+    .warn-box{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-left:4px solid #f59e0b;border-radius:8px;padding:14px 16px;margin:1.5rem 0;font-size:13px;color:#78350f;line-height:1.6;}
+    .badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;}
+    .badge-late{background:rgba(239,68,68,0.1);color:#991b1b;}
+    .badge-damaged{background:rgba(239,68,68,0.1);color:#991b1b;}
+    .badge-partial{background:rgba(245,158,11,0.1);color:#92400e;}
+    .icon-circle{width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:28px;}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="icon-circle">🚚</div>
+    <h1>Delivery Alert</h1>
+    <p>A delivery issue has been flagged and requires your attention</p>
+  </div>
+  <div class="body">
+    <div class="warn-box">
+      <strong>Delivery Issue Detected:</strong>
+      This delivery was recorded as
+      {% if delivery.delivery_status == 'LATE' %}<span class="badge badge-late">Late</span>{% endif %}
+      {% if delivery.condition_status == 'DAMAGED' %}<span class="badge badge-damaged">Damaged</span>{% endif %}
+      {% if delivery.condition_status == 'PARTIAL' %}<span class="badge badge-partial">Partial</span>{% endif %}
+      and may require follow-up action.
+    </div>
+
+    <div class="detail-row">
+      <span class="detail-label">Supplier</span>
+      <span class="detail-value">{{ delivery.supplier.name }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Order Number</span>
+      <span class="detail-value" style="font-family:monospace;background:#f1f5f9;padding:2px 8px;border-radius:4px;">{{ delivery.order_number }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Invoice Number</span>
+      <span class="detail-value" style="font-family:monospace;background:#f1f5f9;padding:2px 8px;border-radius:4px;">{{ delivery.invoice_number }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Product Category</span>
+      <span class="detail-value">{{ delivery.product_category }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Qty Ordered / Delivered</span>
+      <span class="detail-value">{{ delivery.quantity_ordered }} / {{ delivery.quantity_delivered }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Delivery Status</span>
+      <span class="detail-value">{{ delivery.delivery_status }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Condition Status</span>
+      <span class="detail-value">{{ delivery.condition_status }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Driver</span>
+      <span class="detail-value">{{ delivery.driver_name|default:"Not recorded" }}</span>
+    </div>
+    <div class="detail-row" style="border-bottom:none;">
+      <span class="detail-label">Expected / Actual Date</span>
+      <span class="detail-value">{{ delivery.expected_delivery_date }} / {{ delivery.actual_delivery_date }}</span>
+    </div>
+
+    <p style="font-size:12px;color:#94a3b8;margin-top:1.5rem;">Recorded at: {{ timestamp }}</p>
+  </div>
+  <div class="footer">SupplyInsight &copy; {% now "Y" %} — Automated notification. Do not reply.</div>
+</div>
+</body>
+</html>
+
+
+<!-- ═══════════════════════════════════════════════════
+     templates/emails/low_stock.html
+═══════════════════════════════════════════════════ -->
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Inter',Arial,sans-serif;background:#f1f5f9;}
+    .wrap{max-width:600px;margin:2rem auto;}
+    .header{background:linear-gradient(135deg,#ef4444,#f59e0b);color:white;padding:2.5rem 2rem;border-radius:16px 16px 0 0;text-align:center;}
+    .header h1{font-size:1.4rem;font-weight:800;margin-bottom:6px;}
+    .header p{opacity:0.85;font-size:13px;}
+    .body{background:white;padding:2rem;}
+    .footer{background:#f8fafc;padding:1rem 2rem;border-radius:0 0 16px 16px;font-size:12px;color:#64748b;text-align:center;}
+    .detail-row{display:flex;align-items:flex-start;padding:10px 0;border-bottom:1px solid #f1f5f9;font-size:13px;}
+    .detail-label{min-width:160px;color:#64748b;font-weight:600;}
+    .detail-value{color:#0f172a;font-weight:500;}
+    .critical-box{background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-left:4px solid #ef4444;border-radius:8px;padding:14px 16px;margin:1.5rem 0;font-size:13px;color:#7f1d1d;line-height:1.6;}
+    .stock-display{text-align:center;padding:1.5rem;background:#fef2f2;border-radius:12px;margin:1.5rem 0;}
+    .stock-num{font-size:3rem;font-weight:800;color:#dc2626;}
+    .stock-lbl{font-size:13px;color:#7f1d1d;margin-top:4px;}
+    .stock-reorder{font-size:12px;color:#94a3b8;margin-top:4px;}
+    .icon-circle{width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:28px;}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="icon-circle">📦</div>
+    <h1>Low Stock Alert</h1>
+    <p>An inventory item has fallen below its reorder level</p>
+  </div>
+  <div class="body">
+    <div class="critical-box">
+      <strong>Reorder Required:</strong> {{ item.name }} has reached critically low stock levels. Please arrange a reorder immediately to avoid stockouts.
+    </div>
+
+    <div class="stock-display">
+      <div class="stock-num">{{ item.quantity_in_stock }}</div>
+      <div class="stock-lbl">Units Remaining</div>
+      <div class="stock-reorder">Reorder level: {{ item.reorder_level }} units</div>
+    </div>
+
+    <div class="detail-row">
+      <span class="detail-label">Item Name</span>
+      <span class="detail-value">{{ item.name }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">SKU</span>
+      <span class="detail-value" style="font-family:monospace;background:#f1f5f9;padding:2px 8px;border-radius:4px;">{{ item.sku }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Category</span>
+      <span class="detail-value">{{ item.category }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Supplier</span>
+      <span class="detail-value">{{ item.supplier.name }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Warehouse</span>
+      <span class="detail-value">{{ item.warehouse_location }}</span>
+    </div>
+    <div class="detail-row" style="border-bottom:none;">
+      <span class="detail-label">Unit Cost</span>
+      <span class="detail-value">${{ item.unit_cost }}</span>
+    </div>
+
+    <p style="font-size:12px;color:#94a3b8;margin-top:1.5rem;">Alert generated at: {{ timestamp }}</p>
+  </div>
+  <div class="footer">SupplyInsight &copy; {% now "Y" %} — Automated notification. Do not reply.</div>
+</div>
+</body>
+</html>

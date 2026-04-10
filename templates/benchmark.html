@@ -1,0 +1,317 @@
+{% comment %}benchmarks.html{% endcomment %} {% extends "base.html" %} {% load
+static %} {% block title %}Performance Benchmarks{% endblock %} {% block
+page_title %}Performance Benchmarks{% endblock %} {% block page_subtitle
+%}Supplier metrics vs industry averages and percentile rankings{% endblock %} {%
+block extra_css %}
+<style>
+  .bench-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .bench-card {
+    background: var(--card);
+    border: 1px solid var(--line2);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    transition:
+      transform 0.2s,
+      box-shadow 0.2s;
+  }
+  .bench-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+  .bench-metric-name {
+    font-family: "Barlow Condensed", sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--t1);
+    margin-bottom: 4px;
+  }
+  .bench-supplier {
+    font-size: 11px;
+    color: var(--t2);
+    margin-bottom: 12px;
+    font-family: "DM Mono", monospace;
+  }
+  .bench-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+  .bench-row-label {
+    color: var(--t2);
+  }
+  .bench-row-val {
+    font-weight: 700;
+    font-family: "Barlow Condensed", sans-serif;
+    color: var(--t1);
+  }
+  .bench-vs-bar {
+    height: 7px;
+    border-radius: 10px;
+    background: var(--bg3);
+    overflow: hidden;
+    margin-top: 10px;
+    position: relative;
+  }
+  .bench-vs-fill {
+    height: 100%;
+    border-radius: 10px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: width 0.8s;
+  }
+  .bench-industry-marker {
+    position: absolute;
+    top: -3px;
+    height: 13px;
+    width: 2px;
+    background: var(--t2);
+    border-radius: 1px;
+  }
+  .percentile-ring {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 13px;
+    font-family: "Barlow Condensed", sans-serif;
+    border: 3px solid rgba(192, 57, 43, 0.15);
+    position: relative;
+    flex-shrink: 0;
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="kpi-page-header rv">
+  <div>
+    <h2>
+      <i
+        class="mdi mdi-chart-areaspline"
+        style="color: var(--acc); margin-right: 8px"
+      ></i
+      >Performance Benchmarks
+    </h2>
+    <p>Supplier metrics compared to industry averages</p>
+  </div>
+  <div class="kpi-breadcrumb">
+    <a href="{% url 'dashboard' %}">Home</a><i class="mdi mdi-chevron-right"></i
+    ><span>Benchmarks</span>
+  </div>
+</div>
+
+{% if benchmarks %}
+<div class="bench-grid">
+  {% for b in benchmarks %}
+  <div class="bench-card rv">
+    <div
+      style="
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+      "
+    >
+      <div style="flex: 1">
+        <div class="bench-metric-name">{{ b.metric_name }}</div>
+        <div class="bench-supplier">
+          {{ b.supplier.name }} — {{ b.evaluation_period }}
+        </div>
+        <div class="bench-row">
+          <span class="bench-row-label">Actual Value</span
+          ><span class="bench-row-val" style="color: var(--acc)"
+            >{{ b.metric_value|floatformat:1 }}</span
+          >
+        </div>
+        <div class="bench-row">
+          <span class="bench-row-label">Industry Average</span
+          ><span class="bench-row-val"
+            >{{ b.industry_average|floatformat:1 }}</span
+          >
+        </div>
+        <div class="bench-row">
+          <span class="bench-row-label">Benchmark Score</span
+          ><span
+            class="bench-row-val"
+            style="color:{% if b.benchmark_score >= 80 %}var(--success){% elif b.benchmark_score >= 60 %}var(--warning){% else %}var(--danger){% endif %};"
+            >{{ b.benchmark_score|floatformat:1 }}</span
+          >
+        </div>
+        {% if b.notes %}
+        <div
+          style="
+            font-size: 11px;
+            color: var(--t2);
+            margin-top: 8px;
+            padding: 8px;
+            background: var(--bg2);
+            border-radius: 6px;
+            border-left: 3px solid var(--acc);
+          "
+        >
+          {{ b.notes|truncatechars:80 }}
+        </div>
+        {% endif %}
+      </div>
+      <div
+        class="percentile-ring"
+        style="background:conic-gradient({% if b.percentile_rank >= 80 %}var(--success){% elif b.percentile_rank >= 60 %}var(--warning){% else %}var(--danger){% endif %} {{ b.percentile_rank|floatformat:0 }}%, var(--bg3) 0%);color:{% if b.percentile_rank >= 80 %}var(--success){% elif b.percentile_rank >= 60 %}var(--warning){% else %}var(--danger){% endif %};"
+      >
+        {{ b.percentile_rank|floatformat:0 }}%
+      </div>
+    </div>
+    <div class="bench-vs-bar">
+      <div
+        class="bench-vs-fill"
+        style="width:{{ b.benchmark_score|floatformat:0 }}%;background:{% if b.benchmark_score >= 80 %}var(--success){% elif b.benchmark_score >= 60 %}var(--warning){% else %}var(--danger){% endif %};"
+      ></div>
+      <div
+        class="bench-industry-marker"
+        style="left:{% widthratio b.industry_average 100 100 %}%;"
+      ></div>
+    </div>
+    <div
+      style="
+        display: flex;
+        justify-content: space-between;
+        font-size: 10px;
+        color: var(--t3);
+        margin-top: 4px;
+        font-family: &quot;DM Mono&quot;, monospace;
+      "
+    >
+      <span>0</span><span>Industry avg</span><span>100</span>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="kpi-card rv" style="margin-bottom: 1.5rem">
+  <div class="kpi-card-header">
+    <span class="kpi-card-title"
+      ><i class="mdi mdi-table" style="margin-right: 6px; color: var(--acc)"></i
+      >All Benchmarks</span
+    >
+  </div>
+  <div class="kpi-card-body">
+    <div class="kpi-table-wrap">
+      <table id="benchTable" class="table">
+        <thead>
+          <tr>
+            <th>Supplier</th>
+            <th>Metric</th>
+            <th>Actual</th>
+            <th>Industry Avg</th>
+            <th>Benchmark Score</th>
+            <th>Percentile</th>
+            <th>Period</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in benchmarks %}
+          <tr>
+            <td
+              style="
+                font-weight: 600;
+                font-family: &quot;Barlow Condensed&quot;, sans-serif;
+                font-size: 14px;
+              "
+            >
+              {{ b.supplier.name }}
+            </td>
+            <td>{{ b.metric_name }}</td>
+            <td
+              style="
+                font-weight: 700;
+                font-family: &quot;Barlow Condensed&quot;, sans-serif;
+                color: var(--acc);
+              "
+            >
+              {{ b.metric_value|floatformat:1 }}
+            </td>
+            <td>{{ b.industry_average|floatformat:1 }}</td>
+            <td>
+              <span
+                class="kpi-badge {% if b.benchmark_score >= 80 %}success{% elif b.benchmark_score >= 60 %}warning{% else %}danger{% endif %}"
+                >{{ b.benchmark_score|floatformat:1 }}</span
+              >
+            </td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 6px">
+                <span
+                  style="
+                    font-weight: 700;
+                    font-family: &quot;Barlow Condensed&quot;, sans-serif;
+                  "
+                  >{{ b.percentile_rank|floatformat:0 }}%</span
+                >
+                <div class="kpi-progress" style="width: 50px">
+                  <div
+                    class="kpi-progress-bar"
+                    style="width:{{ b.percentile_rank|floatformat:0 }}%;background:var(--acc);"
+                  ></div>
+                </div>
+              </div>
+            </td>
+            <td>{{ b.evaluation_period }}</td>
+            <td style="color: var(--t2)">{{ b.evaluated_at|date:"M d, Y" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="kpi-card rv">
+  <div class="kpi-card-body" style="text-align: center; padding: 4rem 2rem">
+    <i
+      class="mdi mdi-chart-areaspline"
+      style="
+        font-size: 56px;
+        color: var(--line2);
+        display: block;
+        margin-bottom: 16px;
+      "
+    ></i>
+    <h3
+      style="
+        font-family: &quot;Barlow Condensed&quot;, sans-serif;
+        font-size: 18px;
+        margin-bottom: 8px;
+        color: var(--t2);
+      "
+    >
+      No Benchmarks Available
+    </h3>
+    <p
+      style="
+        color: var(--t2);
+        font-size: 14px;
+        max-width: 400px;
+        margin: 0 auto;
+      "
+    >
+      Benchmark data will appear here once supplier performance evaluations have
+      been completed.
+    </p>
+  </div>
+</div>
+{% endif %} {% endblock %} {% block extra_js %}
+<script>
+  $(document).ready(function () {
+    if ($("#benchTable").length) kpiTable("#benchTable");
+  });
+</script>
+{% endblock %}

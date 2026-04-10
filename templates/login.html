@@ -1,232 +1,657 @@
 {% load static %}
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-  <head>
-    <!-- Developed by Allons Mazani-->
-    <base href="/static/">
-    <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=no"
-    />
-    <title>SupplyInsight</title>
-    <!-- plugins:css -->
-    <link rel="stylesheet" href="{% static 'assets/vendors/feather/feather.css' %}" />
-    <link
-      rel="stylesheet"
-      href="{% static 'assets/vendors/mdi/css/materialdesignicons.min.css' %}"
-    />
-    <link
-      rel="stylesheet"
-      href="{% static 'assets/vendors/ti-icons/css/themify-icons.css' %}"
-    />
-    <link
-      rel="stylesheet"
-      href="{% static 'assets/vendors/font-awesome/css/font-awesome.min.css' %}"
-    />
-    <link
-      rel="stylesheet"
-      href="{% static 'assets/vendors/typicons/typicons.css' %}"
-    />
-    <link
-      rel="stylesheet"
-      href="{% static 'assets/vendors/simple-line-icons/css/simple-line-icons.css' %}"
-    />
-    <link
-      rel="stylesheet"
-      href="{% static 'assets/vendors/css/vendor.bundle.base.css' %}"
-    />
-    <link
-      rel="stylesheet"
-      href="{% static 'assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css' %}"
-    />
-    <!-- endinject -->
-    <!-- Plugin css for this page -->
-    <!-- End plugin css for this page -->
-    <!-- inject:css -->
-    <link
-      rel="stylesheet"
-      href="{% static 'assets/css/vertical-layout-light/style.css' %}"
-    />
-    <!-- endinject -->
-    <link rel="shortcut icon" href="{% static 'assets/images/favicon.png' %}" />
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>KPI Fastfood Analytics — Sign In</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@600;700;800;900&family=Syne:wght@700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --bg:#faf8f5;
+      --bg2:#f3efe8;
+      --bg3:#e8e0d2;
+      --acc:#c0392b;
+      --acc2:#e85d04;
+      --accL:#fff0ee;
+      --dark:#1a1512;
+      --mid:#4a3f34;
+      --soft:#8a7a6a;
+      --line:rgba(90,70,50,0.10);
+      --line2:rgba(90,70,50,0.18);
+      --t1:#1a1512;
+      --t2:#8a7a6a;
+      --t3:#b8a48a;
+      --card:rgba(255,253,249,0.96);
+    }
 
-    <style>
-      .input-group {
-        height: 56px; /* matches form-control-lg in most admin themes */
-      }
+    html,body{
+      height:100%;
+      font-family:'Barlow',sans-serif;
+      background:var(--bg);
+      color:var(--t1);
+      overflow:hidden;
+    }
 
-      .input-group-text,
-      .form-control {
-        height: 100%;
-      }
+    /* ── LAYOUT ── */
+    .wrap{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      height:100vh;
+      width:100vw;
+      position:relative;
+    }
 
-      .input-group-text {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
+    /* ── LEFT — FORM SIDE ── */
+    .left{
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      padding:3rem 4rem;
+      background:var(--bg);
+      overflow:hidden;
+      z-index:1;
+    }
 
-      .input-group-text i {
-        font-size: 1.25rem;
-      }
-    </style>
-  </head>
+    /* Three.js sphere behind form */
+    #sphere-canvas{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      pointer-events:none;
+      z-index:0;
+    }
 
-  <body class="sidebar-icon-only">
-    <div class="container-scroller">
-      <div class="container-fluid page-body-wrapper full-page-wrapper">
-        <div
-          class="content-wrapper d-flex align-items-stretch auth auth-img-bg"
-        >
-          <div class="row flex-grow">
-            <div
-              class="col-lg-6 d-flex align-items-center justify-content-center"
-            >
-              <div class="auth-form-transparent text-left p-3">
-                <div class="brand-logo">
-                  <img
-                    src="{% static 'assets/images/logo.png' %}"
-                    alt="logo"
-                    style="height: 200px; width: auto"
-                  />
-                </div>
+    .left-inner{
+      position:relative;
+      z-index:2;
+      width:100%;
+      max-width:400px;
+    }
 
-                <h4>Welcome back!</h4>
-                <h6 class="fw-light">Happy to see you again!</h6>
+    /* Logo */
+    .logo{
+      display:flex;align-items:center;gap:12px;
+      margin-bottom:3rem;
+    }
+    .logo-mark{
+      width:38px;height:38px;border-radius:7px;
+      background:var(--acc);
+      display:flex;align-items:center;justify-content:center;
+      color:#fff;font-size:18px;
+      flex-shrink:0;
+    }
+    .logo-name{
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:15px;font-weight:800;
+      letter-spacing:.12em;text-transform:uppercase;
+      color:var(--t1);
+    }
+    .logo-name em{font-style:normal;color:var(--acc);}
 
-                <form class="pt-3" method="post" action="{% url 'login' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">
-                  {% csrf_token %}
-                  {% if request.GET.next %}
-                    <input type="hidden" name="next" value="{{ request.GET.next }}" />
-                  {% endif %}
-                  <!-- Username/Email -->
-                  <div class="form-group">
-                    <label>Username or Email</label>
+    /* Heading */
+    .form-heading{
+      font-family:'Syne',sans-serif;
+      font-size:clamp(2rem,3.5vw,2.8rem);
+      font-weight:800;
+      line-height:.95;
+      letter-spacing:-.02em;
+      text-transform:uppercase;
+      margin-bottom:.6rem;
+    }
+    .form-heading .acc{color:var(--acc);}
 
-                    <div class="input-group align-items-stretch">
-                      <span
-                        class="input-group-text bg-transparent d-flex align-items-center"
-                      >
-                        <i class="ti-user text-primary"></i>
-                      </span>
+    .form-sub{
+      font-family:'DM Mono',monospace;
+      font-size:10px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:var(--t3);
+      margin-bottom:2.5rem;
+      display:flex;align-items:center;gap:8px;
+    }
+    .form-sub::before{content:'';width:20px;height:1px;background:var(--t3);}
 
-                      <input
-                        type="text"
-                        name="identifier"
-                        class="form-control form-control-lg"
-                        placeholder="Username or Email"
-                        required
-                      />
-                    </div>
-                  </div>
+    /* Divider */
+    .form-divider{
+      height:1px;background:var(--line);
+      margin:2rem 0;
+    }
 
-                  <!-- Password -->
-                  <div class="form-group mt-3">
-                    <label>Password</label>
+    /* Form groups */
+    .fg{margin-bottom:1.2rem;}
 
-                    <div class="input-group align-items-stretch">
-                      <span
-                        class="input-group-text bg-transparent d-flex align-items-center"
-                      >
-                        <i class="ti-lock text-primary"></i>
-                      </span>
+    .fg label{
+      display:block;
+      font-family:'DM Mono',monospace;
+      font-size:9px;
+      font-weight:500;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:var(--t3);
+      margin-bottom:6px;
+    }
 
-                      <input
-                        type="password"
-                        name="password"
-                        class="form-control form-control-lg"
-                        placeholder="Password"
-                        required
-                      />
-                    </div>
-                  </div>
+    .input-wrap{position:relative;display:flex;align-items:center;}
+    .input-icon{
+      position:absolute;left:13px;
+      color:var(--t3);font-size:15px;
+      pointer-events:none;
+      transition:color .2s;
+    }
 
-                  <!-- Options -->
-                  <div
-                    class="my-3 d-flex justify-content-between align-items-center"
-                  >
-                    <div class="form-check">
-                      <label class="form-check-label text-muted">
-                        <input type="checkbox" class="form-check-input" style="border: 5px solid #000;"   />
-                        Keep me signed in
-                      </label>
-                    </div>
-                    <a href="#" class="auth-link text-black"
-                      >Forgot password?</a
-                    >
-                  </div>
+    input[type=text],
+    input[type=password],
+    input[type=email]{
+      width:100%;
+      padding:11px 13px 11px 40px;
+      border:1.5px solid var(--line2);
+      border-radius:6px;
+      font-size:13px;
+      font-family:'Barlow',sans-serif;
+      color:var(--t1);
+      background:var(--card);
+      outline:none;
+      transition:border-color .2s,box-shadow .2s;
+    }
+    input:focus{
+      border-color:var(--acc);
+      box-shadow:0 0 0 3px rgba(192,57,43,0.1);
+    }
+    input:focus + .input-icon,
+    .input-wrap:focus-within .input-icon{color:var(--acc);}
+    input::placeholder{color:var(--t3);}
 
-                  <!-- Button -->
-                  <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary btn-lg fw-medium">
-                      LOGIN
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-            <div class="col-lg-6 login-half-bg d-flex flex-row">
-              <p
-                class="text-white fw-medium text-center flex-grow align-self-end"
-              >
-                Copyright &copy; 2026 All Rights Reserved.
-              </p>
+    .input-toggle{
+      position:absolute;right:12px;
+      background:none;border:none;cursor:pointer;
+      color:var(--t3);font-size:15px;padding:0;
+      transition:color .2s;
+    }
+    .input-toggle:hover{color:var(--acc);}
+
+    /* Options row */
+    .options-row{
+      display:flex;align-items:center;
+      justify-content:space-between;
+      margin-bottom:1.5rem;
+    }
+    .check-label{
+      display:flex;align-items:center;gap:7px;
+      font-size:12px;color:var(--t2);
+      cursor:pointer;
+    }
+    input[type=checkbox]{
+      accent-color:var(--acc);
+      width:13px;height:13px;
+    }
+    .forgot-link{
+      font-family:'DM Mono',monospace;
+      font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+      color:var(--acc);text-decoration:none;
+      transition:opacity .2s;
+    }
+    .forgot-link:hover{opacity:.7;}
+
+    /* Submit */
+    .btn-submit{
+      width:100%;
+      padding:13px;
+      background:var(--acc);
+      border:none;border-radius:6px;
+      color:#fff;
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:13px;font-weight:800;
+      letter-spacing:.14em;text-transform:uppercase;
+      cursor:pointer;
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      transition:background .2s,transform .15s;
+      position:relative;overflow:hidden;
+    }
+    .btn-submit::after{
+      content:'';position:absolute;inset:0;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent);
+      transform:translateX(-100%);
+      transition:transform .5s;
+    }
+    .btn-submit:hover{background:#a93226;}
+    .btn-submit:hover::after{transform:translateX(100%);}
+    .btn-submit:active{transform:scale(0.99);}
+
+    .ft{
+      font-family:'DM Mono',monospace;
+      font-size:9px;letter-spacing:.08em;text-transform:uppercase;
+      color:var(--t3);
+      margin-top:2rem;
+      text-align:center;
+    }
+
+    /* ── RIGHT — IMAGE SIDE ── */
+    .right{
+      position:relative;
+      overflow:hidden;
+    }
+
+    .right-img{
+      position:absolute;inset:0;
+      width:100%;height:100%;
+      object-fit:cover;
+      object-position:center;
+    }
+
+    /* Warm overlay matching theme */
+    .right-overlay{
+      position:absolute;inset:0;
+      background:
+        linear-gradient(
+          160deg,
+          rgba(26,15,10,0.72) 0%,
+          rgba(192,57,43,0.45) 50%,
+          rgba(232,93,4,0.55) 100%
+        );
+      z-index:1;
+    }
+
+    /* Animated noise/grain texture overlay */
+    .right-grain{
+      position:absolute;inset:0;
+      z-index:2;
+      opacity:.045;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size:200px;
+      animation:grainShift 8s steps(10) infinite;
+    }
+    @keyframes grainShift{
+      0%{background-position:0 0;}
+      10%{background-position:-5% -10%;}
+      20%{background-position:-15% 5%;}
+      30%{background-position:7% -25%;}
+      40%{background-position:-5% 25%;}
+      50%{background-position:-15% 10%;}
+      60%{background-position:15% 0%;}
+      70%{background-position:0 15%;}
+      80%{background-position:3% 35%;}
+      90%{background-position:-10% 10%;}
+      100%{background-position:0 0;}
+    }
+
+    /* Animated horizontal scan line */
+    .right-scan{
+      position:absolute;
+      left:0;right:0;
+      height:2px;
+      background:linear-gradient(90deg,transparent,rgba(192,57,43,0.6),transparent);
+      z-index:3;
+      animation:scanDown 6s ease-in-out infinite;
+    }
+    @keyframes scanDown{
+      0%{top:-5%;opacity:0;}
+      10%{opacity:1;}
+      90%{opacity:0.4;}
+      100%{top:105%;opacity:0;}
+    }
+
+    /* Right content */
+    .right-content{
+      position:absolute;inset:0;
+      z-index:4;
+      display:flex;flex-direction:column;
+      justify-content:flex-end;
+      padding:3rem;
+    }
+
+    .right-tag{
+      font-family:'DM Mono',monospace;
+      font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+      color:rgba(255,255,255,0.55);
+      display:flex;align-items:center;gap:8px;
+      margin-bottom:1rem;
+    }
+    .right-tag::before{content:'';width:20px;height:1px;background:rgba(255,255,255,0.4);}
+
+    .right-title{
+      font-family:'Syne',sans-serif;
+      font-size:clamp(2rem,3.5vw,3.2rem);
+      font-weight:800;
+      line-height:.92;
+      letter-spacing:-.025em;
+      text-transform:uppercase;
+      color:#fff;
+      margin-bottom:1.5rem;
+    }
+    .right-title span{color:var(--acc2);}
+
+    /* Feature pills */
+    .feat-pills{
+      display:flex;flex-direction:column;gap:8px;
+      margin-bottom:2rem;
+    }
+    .feat-pill{
+      display:inline-flex;align-items:center;gap:9px;
+      width:fit-content;
+      padding:8px 14px;
+      border-radius:4px;
+      border:1px solid rgba(255,255,255,0.15);
+      background:rgba(26,15,10,0.38);
+      backdrop-filter:blur(8px);
+      font-size:12px;font-weight:500;
+      color:rgba(255,255,255,0.88);
+      animation:pillIn .6s cubic-bezier(.16,1,.3,1) both;
+    }
+    .feat-pill:nth-child(1){animation-delay:.2s;}
+    .feat-pill:nth-child(2){animation-delay:.35s;}
+    .feat-pill:nth-child(3){animation-delay:.5s;}
+    .feat-pill:nth-child(4){animation-delay:.65s;}
+    @keyframes pillIn{from{opacity:0;transform:translateX(-12px);}to{opacity:1;transform:none;}}
+
+    .feat-pill i{font-size:15px;color:var(--acc2);}
+
+    /* Stat strip */
+    .stat-strip{
+      display:flex;gap:1px;
+      background:rgba(255,255,255,0.08);
+      border-radius:6px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,0.1);
+    }
+    .stat-block{
+      flex:1;padding:14px 12px;text-align:center;
+      background:rgba(26,15,10,0.35);
+      backdrop-filter:blur(6px);
+    }
+    .stat-num{
+      font-family:'Syne',sans-serif;
+      font-size:1.4rem;font-weight:800;
+      color:#fff;line-height:1;margin-bottom:3px;
+    }
+    .stat-lbl{
+      font-family:'DM Mono',monospace;
+      font-size:8px;letter-spacing:.1em;text-transform:uppercase;
+      color:rgba(255,255,255,0.45);
+    }
+
+    /* Top-right corner badge */
+    .badge-corner{
+      position:absolute;top:2rem;right:2rem;
+      z-index:5;
+      display:flex;align-items:center;gap:7px;
+      padding:6px 12px;
+      border-radius:4px;
+      border:1px solid rgba(192,57,43,0.5);
+      background:rgba(26,15,10,0.55);
+      backdrop-filter:blur(10px);
+    }
+    .badge-dot{
+      width:6px;height:6px;border-radius:50%;
+      background:var(--acc2);
+      animation:pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(0.8);}}
+    .badge-txt{
+      font-family:'DM Mono',monospace;
+      font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+      color:rgba(255,255,255,0.7);
+    }
+
+    @media(max-width:768px){
+      .wrap{grid-template-columns:1fr;}
+      .right{display:none;}
+      .left{padding:2rem;}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- ── LEFT: FORM ── -->
+    <div class="left">
+      <canvas id="sphere-canvas"></canvas>
+
+      <div class="left-inner">
+
+        <div class="logo">
+          <div class="logo-mark"><i class="mdi mdi-chart-bar"></i></div>
+          <span class="logo-name">KPI <em>Fast</em>food</span>
+        </div>
+
+        <div class="form-heading">
+          Sign <span class="acc">In</span>
+        </div>
+        <div class="form-sub">Analytics Dashboard</div>
+
+        <form method="post" action="{% url 'login' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}" id="loginForm">
+          {% csrf_token %}
+          {% if request.GET.next %}
+            <input type="hidden" name="next" value="{{ request.GET.next }}"/>
+          {% endif %}
+
+          <div class="fg">
+            <label>Username or Email</label>
+            <div class="input-wrap">
+              <i class="mdi mdi-account-outline input-icon"></i>
+              <input type="text" name="identifier" placeholder="Enter username or email" required autocomplete="username"/>
             </div>
           </div>
-        </div>
-        <!-- content-wrapper ends -->
+
+          <div class="fg">
+            <label>Password</label>
+            <div class="input-wrap">
+              <i class="mdi mdi-lock-outline input-icon"></i>
+              <input type="password" name="password" id="pwInput" placeholder="Enter password" required autocomplete="current-password"/>
+              <button type="button" class="input-toggle" id="pwToggle">
+                <i class="mdi mdi-eye-outline" id="pwIcon"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-divider"></div>
+
+          <div class="options-row">
+            <label class="check-label">
+              <input type="checkbox" style="accent-color:var(--acc);"/>
+              Keep me signed in
+            </label>
+            <a href="#" class="forgot-link">Forgot password?</a>
+          </div>
+
+          <button type="submit" class="btn-submit">
+            <i class="mdi mdi-login"></i> Access Dashboard
+          </button>
+        </form>
+
+        <p class="ft">© 2026 KPI Fastfood Analytics · Supply Chain Intelligence</p>
       </div>
-      <!-- page-body-wrapper ends -->
     </div>
-    <!-- container-scroller -->
-    <!-- plugins:js -->
-    <script src="{% static 'assets/vendors/js/vendor.bundle.base.js' %}"></script>
-    <script src="{% static 'assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js' %}"></script>
-    <!-- endinject -->
-    <!-- Plugin js for this page -->
-    <!-- End plugin js for this page -->
-    <!-- inject:js -->
-    <script src="{% static 'assets/js/off-canvas.js' %}"></script>
-    <script src="{% static 'assets/js/hoverable-collapse.js' %}"></script>
-    <script src="{% static 'assets/js/template.js' %}"></script>
-    <script src="{% static 'assets/js/settings.js' %}"></script>
-    <script src="{% static 'assets/js/todolist.js' %}"></script>
-    <!-- endinject -->
-    <!-- SweetAlert2 CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    {% if messages %}
-      <div id="swal-messages-container" style="display: none;">
-        {% for message in messages %}
-          <div
-            class="swal-message"
-            data-icon="{% if 'error' in message.tags %}error{% elif 'warning' in message.tags %}warning{% elif 'success' in message.tags %}success{% else %}info{% endif %}"
-            data-title="{{ message|escapejs }}"
-          ></div>
-        {% endfor %}
+
+    <!-- ── RIGHT: IMAGE ── -->
+    <div class="right">
+      <!-- Restaurant / fast food kitchen image -->
+      <img
+        class="right-img"
+        src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1400&q=85&auto=format&fit=crop"
+        alt="Restaurant kitchen"
+      />
+      <div class="right-overlay"></div>
+      <div class="right-grain"></div>
+      <div class="right-scan"></div>
+
+      <!-- Live badge -->
+      <div class="badge-corner">
+        <div class="badge-dot"></div>
+        <span class="badge-txt">Live Data</span>
       </div>
-    {% endif %}
 
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        var container = document.getElementById("swal-messages-container");
-        if (!container) return;
+      <!-- Bottom content -->
+      <div class="right-content">
+        <div class="right-tag">AI-Powered Platform</div>
+        <div class="right-title">
+          Supply Chain<br/>
+          <span>Intelligence</span><br/>
+          Command
+        </div>
 
-        var messages = container.querySelectorAll(".swal-message");
-        messages.forEach(function (el) {
-          Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: el.dataset.icon,
-            title: el.dataset.title,
-            showConfirmButton: false,
-            timer: 4000,
-            timerProgressBar: true
-          });
-        });
+        <div class="feat-pills">
+          <div class="feat-pill"><i class="mdi mdi-brain"></i>BERT + VADER Sentiment Engine</div>
+          <div class="feat-pill"><i class="mdi mdi-truck-check-outline"></i>Real-Time Supplier Scoring</div>
+          <div class="feat-pill"><i class="mdi mdi-chart-areaspline"></i>Market Trend Forecasting</div>
+          <div class="feat-pill"><i class="mdi mdi-shield-check-outline"></i>Risk & Compliance Monitoring</div>
+        </div>
+
+        <div class="stat-strip">
+          <div class="stat-block">
+            <div class="stat-num">99%</div>
+            <div class="stat-lbl">Uptime</div>
+          </div>
+          <div class="stat-block">
+            <div class="stat-num">7+</div>
+            <div class="stat-lbl">Modules</div>
+          </div>
+          <div class="stat-block">
+            <div class="stat-num">360°</div>
+            <div class="stat-lbl">Visibility</div>
+          </div>
+          <div class="stat-block">
+            <div class="stat-num">Live</div>
+            <div class="stat-lbl">Analytics</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /wrap -->
+
+  <!-- Django messages -->
+  {% if messages %}
+  <div id="swal-msgs" style="display:none">
+    {% for message in messages %}
+    <span data-icon="{% if 'error' in message.tags %}error{% elif 'warning' in message.tags %}warning{% elif 'success' in message.tags %}success{% else %}info{% endif %}"
+          data-title="{{ message|escapejs }}"></span>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+  /* ── THREE.JS SPHERE — left panel ── */
+  (function(){
+    const canvas = document.getElementById('sphere-canvas');
+    const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+    renderer.setClearColor(0x000000, 0);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(65, 1, 0.1, 1000);
+    camera.position.z = 4.8;
+
+    function resize(){
+      const W = canvas.offsetWidth;
+      const H = canvas.offsetHeight;
+      renderer.setSize(W, H);
+      camera.aspect = W / H;
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    /* Particle sphere — warm palette, lower opacity so form stays readable */
+    const COUNT = 8000;
+    const geo = new THREE.BufferGeometry();
+    const pos = new Float32Array(COUNT*3);
+    const col = new Float32Array(COUNT*3);
+
+    const palette = [
+      new THREE.Color('#c0392b'),
+      new THREE.Color('#e85d04'),
+      new THREE.Color('#b8a48a'),
+      new THREE.Color('#d6c9b4'),
+      new THREE.Color('#9a8468'),
+      new THREE.Color('#f3efe8'),
+    ];
+
+    for(let i=0;i<COUNT;i++){
+      const theta = 2*Math.PI*Math.random();
+      const phi   = Math.acos(2*Math.random()-1);
+      const r     = 2.5 + (Math.random()-0.5)*1.0;
+      pos[i*3]   = r*Math.sin(phi)*Math.cos(theta);
+      pos[i*3+1] = r*Math.sin(phi)*Math.sin(theta);
+      pos[i*3+2] = r*Math.cos(phi);
+      const c = palette[Math.floor(Math.random()*palette.length)].clone();
+      const lat = Math.abs(pos[i*3+1])/r;
+      c.multiplyScalar(0.2+(1-lat)*0.55);
+      col[i*3]=c.r; col[i*3+1]=c.g; col[i*3+2]=c.b;
+    }
+    geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+    geo.setAttribute('color',    new THREE.BufferAttribute(col,3));
+
+    const mat = new THREE.PointsMaterial({
+      size:0.016, vertexColors:true, transparent:true,
+      opacity:0.45, sizeAttenuation:true,
+      blending:THREE.AdditiveBlending, depthWrite:false
+    });
+    const sphere = new THREE.Points(geo, mat);
+    scene.add(sphere);
+
+    /* Rings */
+    [[2.52,'#c0392b',0.09],[2.62,'#e85d04',0.06]].forEach(([r,c,o],i)=>{
+      const rg = new THREE.TorusGeometry(r,0.003,2,160);
+      const rm = new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:o});
+      const ring = new THREE.Mesh(rg,rm);
+      ring.rotation.x = 0.35+i*0.25;
+      ring.rotation.y = 0.2+i*0.3;
+      ring.userData.s = 0.0003+i*0.0002;
+      scene.add(ring);
+    });
+
+    let mx=0,my=0;
+    document.addEventListener('mousemove',e=>{
+      mx=(e.clientX/window.innerWidth -.5)*0.5;
+      my=(e.clientY/window.innerHeight-.5)*0.35;
+    });
+
+    let t=0;
+    (function animate(){
+      requestAnimationFrame(animate);
+      t+=0.003;
+      sphere.rotation.y = t*0.12+mx*0.5;
+      sphere.rotation.x = t*0.05+my*0.3;
+      scene.children.forEach(o=>{
+        if(o.userData.s){o.rotation.z+=o.userData.s;o.rotation.x+=o.userData.s*0.4;}
       });
-    </script>
-  </body>
+      renderer.render(scene,camera);
+    })();
+  })();
 
-  <!-- Mirrored from demo.bootstrapdash.com/star-admin-2-pro/themes/vertical-icon-menu/pages/samples/login-2.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 13 Jan 2026 10:22:26 GMT -->
+  /* ── PASSWORD TOGGLE ── */
+  document.getElementById('pwToggle').onclick = function(){
+    const inp = document.getElementById('pwInput');
+    const ico = document.getElementById('pwIcon');
+    if(inp.type==='password'){ inp.type='text'; ico.className='mdi mdi-eye-off-outline'; }
+    else{ inp.type='password'; ico.className='mdi mdi-eye-outline'; }
+  };
+
+  /* ── SWEETALERT MESSAGES ── */
+  document.addEventListener('DOMContentLoaded', function(){
+    const c = document.getElementById('swal-msgs');
+    if(!c) return;
+    c.querySelectorAll('span').forEach(el=>{
+      Swal.fire({
+        toast:true, position:'top-end',
+        icon:el.dataset.icon,
+        title:el.dataset.title,
+        showConfirmButton:false,
+        timer:4500, timerProgressBar:true,
+        background:'var(--card)',
+        color:'var(--t1)',
+      });
+    });
+  });
+  </script>
+</body>
 </html>

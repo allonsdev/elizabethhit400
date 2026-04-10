@@ -1,829 +1,628 @@
-
-<!doctype html>
-<html lang="en">
-
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-
-    <title>SupplyInsight</title>
-
-    <base href="/static/" />
-
-    <!-- CSS -->
-    <link rel="stylesheet" href="assets/vendors/feather/feather.css" />
-    <link rel="stylesheet" href="assets/vendors/mdi/css/materialdesignicons.min.css" />
-    <link rel="stylesheet" href="assets/vendors/ti-icons/css/themify-icons.css" />
-    <link rel="stylesheet" href="assets/vendors/font-awesome/css/font-awesome.min.css" />
-    <link rel="stylesheet" href="assets/vendors/typicons/typicons.css" />
-    <link rel="stylesheet" href="assets/vendors/simple-line-icons/css/simple-line-icons.css" />
-    <link rel="stylesheet" href="assets/vendors/css/vendor.bundle.base.css" />
-    <link rel="stylesheet" href="assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css" />
-
-    <link rel="stylesheet" href="assets/css/vertical-layout-light/style.css" />
-
-    <link rel="shortcut icon" href="assets/images/favicon.png" />
-
-    <!-- DataTables -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
-    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css" />
-
-    <style>
-        table.dataTable thead th {
-            background: #1f2d3d;
-            color: white;
-            font-weight: 600;
-          }
-    
-          .dataTables_filter {
-            float: right;
-            margin-bottom: 10px;
-          }
-    
-          .dataTables_filter input {
-            border: 1px solid #ccc;
-            padding: 5px;
-            border-radius: 4px;
-          }
-    
-          .dataTables_paginate {
-            margin-top: 15px;
-            text-align: right;
-          }
-    </style>
-</head>
-
-<body class="sidebar-icon-only with-welcome-text">
-    <div class="container-scroller">
-        <!-- TOP NAVBAR -->
-
-        <nav class="navbar default-layout col-lg-12 col-12 p-0 fixed-top d-flex align-items-top flex-row">
-            <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-start">
-                <button class="navbar-toggler align-self-center" type="button" data-bs-toggle="minimize">
-                    <span class="icon-menu"></span>
-                </button>
-
-                <div class="brand-logo">
-                    <img src="/assets/images/logo.png" style="height: 70px" />
-                </div>
-            </div>
-
-            <div class="navbar-menu-wrapper d-flex align-items-top">
-                <ul class="navbar-nav">
-                    <li class="nav-item fw-semibold d-none d-lg-block">
-                        <h1 class="welcome-text">
-                Good Morning,
-                <span class="text-black fw-bold"
-                  >{{ request.user.username }}</span
-                >
-              </h1>
-
-                        <h3 class="welcome-sub-text">Performance summary this week</h3>
-                    </li>
-                </ul>
-            </div>
-        </nav>
-
-        <div class="container-fluid page-body-wrapper">
-            <!-- SIDEBAR -->
-
-       <nav class="sidebar sidebar-offcanvas" id="sidebar">
-
-<ul class="nav">
-
-<li class="nav-item">
-<a class="nav-link" href="{% url 'dashboard' %}">
-<i class="mdi mdi-view-dashboard menu-icon"></i>
-<span class="menu-title">Dashboard</span>
-</a>
-</li>
-
-<li class="nav-item">
-<a class="nav-link" href="{% url 'customerdashboard' %}">
-<i class="mdi mdi-account-group menu-icon"></i>
-<span class="menu-title">Customer Dashboard</span>
-</a>
-</li>
-
-<li class="nav-item">
-<a class="nav-link" href="{% url 'supplierdashboard' %}">
-<i class="mdi mdi-truck menu-icon"></i>
-<span class="menu-title">Supplier Dashboard</span>
-</a>
-</li>
-
-<li class="nav-item">
-<a class="nav-link" href="{% url 'inventory' %}">
-<i class="mdi mdi-package-variant menu-icon"></i>
-<span class="menu-title">Inventory</span>
-</a>
-</li>
-
-<li class="nav-item">
-<a class="nav-link" href="{% url 'audit' %}">
-<i class="mdi mdi-clipboard-check menu-icon"></i>
-<span class="menu-title">Audit</span>
-</a>
-</li>
-
-<li class="nav-item">
-<a class="nav-link" href="{% url 'register' %}">
-<i class="mdi mdi-account-plus menu-icon"></i>
-<span class="menu-title">Register Supplier</span>
-</a>
-</li>
-
-<li class="nav-item">
-<a class="nav-link" href="{% url 'delivery' %}">
-<i class="mdi mdi-truck-delivery menu-icon"></i>
-<span class="menu-title">Delivery</span>
-</a>
-</li>
-
-<li class="nav-item">
-<a class="nav-link" href="{% url 'review' %}">
-<i class="mdi mdi-star-circle menu-icon"></i>
-<span class="menu-title">Review</span>
-</a>
-</li>
-
-<li class="nav-item">
-<a class="nav-link" href="{% url 'complaint' %}">
-<i class="mdi mdi-alert-circle menu-icon"></i>
-<span class="menu-title">Complaint</span>
-</a>
-</li>
-
-<li class="nav-item">
-<a class="nav-link" href="{% url 'logout' %}">
-<i class="mdi mdi-logout menu-icon"></i>
-<span class="menu-title">Logout</span>
-</a>
-</li>
-
-</ul>
-
-</nav>
-
-            <!-- MAIN PANEL -->
-
-            <div class="main-panel">
-                <div class="content-wrapper">
-                    <!-- KPI CARDS -->
-
-                    <div class="row">
-                        <div class="col-md-2 mb-3">
-                            <div class="card bg-primary text-white shadow-sm">
-                                <div class="card-body text-center">
-                                    <h6>Total Suppliers</h6>
-                                    <h3 class="fw-bold">{{ total_suppliers }}</h3>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-2 mb-3">
-                            <div class="card bg-success text-white shadow-sm">
-                                <div class="card-body text-center">
-                                    <h6>Active Suppliers</h6>
-                                    <h3 class="fw-bold">{{ active_suppliers }}</h3>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-2 mb-3">
-                            <div class="card bg-info text-white shadow-sm">
-                                <div class="card-body text-center">
-                                    <h6>Total Customers</h6>
-                                    <h3 class="fw-bold">{{ total_customers }}</h3>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-2 mb-3">
-                            <div class="card bg-warning text-dark shadow-sm">
-                                <div class="card-body text-center">
-                                    <h6>Total Deliveries</h6>
-                                    <h3 class="fw-bold">{{ total_deliveries }}</h3>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-2 mb-3">
-                            <div class="card bg-secondary text-white shadow-sm">
-                                <div class="card-body text-center">
-                                    <h6>Inventory Items</h6>
-                                    <h3 class="fw-bold">{{ inventory_count }}</h3>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-2 mb-3">
-                            <div class="card bg-danger text-white shadow-sm">
-                                <div class="card-body text-center">
-                                    <h6>Complaints</h6>
-                                    <h3 class="fw-bold">{{ total_complaints }}</h3>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- CHARTS -->
-
-                    <div class="row">
-                        <div class="col-lg-4 mb-4">
-                            <div class="card shadow-sm">
-                                <div class="card-body">
-                                    <h5>Supplier Sentiment</h5>
-                                    <canvas id="sentimentChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-4 mb-4">
-                            <div class="card shadow-sm">
-                                <div class="card-body">
-                                    <h5>Delivery Performance</h5>
-                                    <canvas id="deliveryChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-4 mb-4">
-                            <div class="card shadow-sm">
-                                <div class="card-body">
-                                    <h5>Inventory Categories</h5>
-                                    <canvas id="inventoryChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- PREDICTIONS -->
-
-
-                 
-
-                    <!-- ================= PREDICTIONS ================= -->
-
-                    <div class="row">
-
-                        <div class="col-lg-6 mb-4">
-                            <div class="card shadow-sm">
-                                <div class="card-body">
-                                    <h5>Customer Churn Prediction</h5>
-                                    <canvas id="churnChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-6 mb-4">
-                            <div class="card shadow-sm">
-                                <div class="card-body">
-                                    <h5>Market Trend Analysis</h5>
-                                    <canvas id="marketTrendChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-
-
-                    <!-- TABLES -->
-
-                    <div class="container-fluid mt-4">
-                        <div class="row g-4">
-
-                            <!-- SUPPLIER PERFORMANCE -->
-
-                            <div class="col-lg-6">
-
-                                <div class="card shadow-sm h-100">
-                                    <div class="card-header bg-dark text-white">
-                                        <h5 class="mb-0">Supplier Performance</h5>
-                                    </div>
-
-                                    <div class="card-body">
-
-                                        <table id="suppliersTable" class="table table-bordered table-striped">
-
-                                            <thead>
-                                                <tr>
-                                                    <th>Supplier</th>
-                                                    <th>Timeliness</th>
-                                                    <th>Quality</th>
-                                                    <th>Risk</th>
-                                                    <th>Score</th>
-                                                </tr>
-                                            </thead>
-
-                                            <tbody>
-
-                                                {% for s in supplier_scores %}
-
-                                                <tr>
-
-                                                    <td>{{ s.supplier.name }}</td>
-
-                                                    <td class="{% if s.timeliness_score >= 80 %} bg-success text-white {% elif s.timeliness_score >= 50 %} bg-warning text-dark {% else %} bg-danger text-white {% endif %}">
-                                                        {{ s.timeliness_score }}
-                                                    </td>
-
-                                                    <td class="{% if s.quality_score >= 80 %} bg-success text-white {% elif s.quality_score >= 50 %} bg-warning text-dark {% else %} bg-danger text-white {% endif %}">
-                                                        {{ s.quality_score }}
-                                                    </td>
-
-                                                    <td class="{% if s.risk_index >= 80 %} bg-danger text-white {% elif s.risk_index >= 50 %} bg-warning text-dark {% else %} bg-success text-white {% endif %}">
-                                                        {{ s.risk_index }}
-                                                    </td>
-
-                                                    <td class="bg-info text-white">
-                                                        {{ s.final_score }}
-                                                    </td>
-
-                                                </tr>
-
-                                                {% endfor %}
-
-                                            </tbody>
-
-                                        </table>
-
-                                    </div>
-                                </div>
-
-                            </div>
-
-                            <!-- DELIVERY PERFORMANCE -->
-
-                            <div class="col-lg-6">
-
-                                <div class="card shadow-sm h-100">
-                                    <div class="card-header bg-primary text-white">
-                                        <h5 class="mb-0">Delivery Performance</h5>
-                                    </div>
-
-                                    <div class="card-body">
-
-                                        <table id="deliveryTable" class="table table-bordered table-striped">
-
-                                            <thead>
-                                                <tr>
-                                                    <th>Supplier</th>
-                                                    <th>Status</th>
-                                                    <th>Condition</th>
-                                                    <th>Date</th>
-                                                </tr>
-                                            </thead>
-
-                                            <tbody>
-
-                                                {% for d in deliveries %}
-
-                                                <tr>
-
-                                                    <td>{{ d.supplier.name }}</td>
-
-                                                    <td class="{% if d.delivery_status == 'ON_TIME' %} bg-success text-white {% elif d.delivery_status == 'LATE' %} bg-warning text-dark {% else %} bg-danger text-white {% endif %}">
-                                                        {{ d.delivery_status }}
-                                                    </td>
-
-                                                    <td class="{% if d.condition_status == 'GOOD' %} bg-success text-white {% elif d.condition_status == 'MINOR_DAMAGE' %} bg-warning text-dark {% else %} bg-danger text-white {% endif %}">
-                                                        {{ d.condition_status }}
-                                                    </td>
-
-                                                    <td>{{ d.delivery_date }}</td>
-
-                                                </tr>
-
-                                                {% endfor %}
-
-                                            </tbody>
-
-                                        </table>
-
-                                    </div>
-                                </div>
-
-                            </div>
-
-                            <!-- CUSTOMER REVIEWS -->
-
-                            <div class="col-lg-6">
-
-                                <div class="card shadow-sm h-100">
-                                    <div class="card-header bg-success text-white">
-                                        <h5 class="mb-0">Customer Reviews</h5>
-                                    </div>
-
-                                    <div class="card-body">
-
-                                        <table id="reviewsTable" class="table table-bordered table-striped">
-
-                                            <thead>
-                                                <tr>
-                                                    <th>Customer</th>
-                                                    <th>Brand</th>
-                                                    <th>Score</th>
-                                                </tr>
-                                            </thead>
-
-                                            <tbody>
-
-                                                {% for r in reviews %}
-
-                                                <tr>
-
-                                                    <td>{{ r.customer.full_name }}</td>
-                                                    <td>{{ r.brand.name }}</td>
-
-                                                    <td class="{% if r.overall_weighted_score >= 4 %} bg-success text-white {% elif r.overall_weighted_score >= 2.5 %} bg-warning text-dark {% else %} bg-danger text-white {% endif %}">
-                                                        {{ r.overall_weighted_score }}
-                                                    </td>
-
-                                                </tr>
-
-                                                {% endfor %}
-
-                                            </tbody>
-
-                                        </table>
-
-                                    </div>
-                                </div>
-
-                            </div>
-
-                            <!-- SENTIMENT -->
-
-                            <div class="col-lg-6">
-
-                                <div class="card shadow-sm h-100">
-                                    <div class="card-header bg-warning text-dark">
-                                        <h5 class="mb-0">Supplier Sentiment Analysis</h5>
-                                    </div>
-
-                                    <div class="card-body">
-
-                                        <table id="sentimentTable" class="table table-bordered table-striped">
-
-                                            <thead>
-                                                <tr>
-                                                    <th>Supplier</th>
-                                                    <th>Sentiment</th>
-                                                </tr>
-                                            </thead>
-
-                                            <tbody>
-
-                                                {% for s in sentiments %}
-
-                                                <tr>
-
-                                                    <td>{{ s.supplier.name }}</td>
-
-                                                    <td class="{% if s.sentiment_label == 'Positive' %} bg-success text-white {% elif s.sentiment_label == 'Neutral' %} bg-warning text-dark {% else %} bg-danger text-white {% endif %}">
-                                                        {{ s.sentiment_label }}
-                                                    </td>
-
-                                                </tr>
-
-                                                {% endfor %}
-
-                                            </tbody>
-
-                                        </table>
-
-                                    </div>
-                                </div>
-
-                            </div>
-
-                            <!-- COMPLAINTS -->
-
-                            <div class="col-lg-12">
-
-                                <div class="card shadow-sm">
-
-                                    <div class="card-header bg-danger text-white">
-                                        <h5 class="mb-0">Supplier Complaints</h5>
-                                    </div>
-
-                                    <div class="card-body">
-
-                                        <table id="complaintsTable" class="table table-bordered table-striped">
-
-                                            <thead>
-                                                <tr>
-                                                    <th>Supplier</th>
-                                                    <th>Severity</th>
-                                                    <th>Status</th>
-                                                </tr>
-                                            </thead>
-
-                                            <tbody>
-
-                                                {% for c in complaints %}
-
-                                                <tr>
-
-                                                    <td>{{ c.supplier.name }}</td>
-
-                                                    <td class="{% if c.severity_level >= 8 %} bg-danger text-white {% elif c.severity_level >= 5 %} bg-warning text-dark {% else %} bg-success text-white {% endif %}">
-                                                        {{ c.severity_level }}
-                                                    </td>
-
-                                                    <td class="{% if c.resolved %} bg-success text-white {% else %} bg-warning text-dark {% endif %}">
-                                                        {% if c.resolved %}Resolved{% else %}Open{% endif %}
-                                                    </td>
-
-                                                </tr>
-
-                                                {% endfor %}
-
-                                            </tbody>
-
-                                        </table>
-
-                                    </div>
-                                </div>
-
-                            </div>
-
-                        </div>
-                    </div>
-
-
-
-                    <!-- FOOTER -->
-
-                    <footer class="footer">
-                        <div class="d-sm-flex justify-content-center justify-content-sm-between">
-                            <span class="text-muted"> SupplyInsights Dashboard </span>
-
-                            <span> © 2026 All Rights Reserved </span>
-                        </div>
-                    </footer>
-                </div>
-            </div>
+{% extends "base.html" %} {% load static %} {% block title %}Overview
+Dashboard{% endblock %} {% block page_title %}Overview Dashboard{% endblock %}
+{% block page_subtitle %}Unified analytics across all modules{% endblock %} 
+{% block extra_css %}
+<style>
+  .kpi-ribbon {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .chart-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .table-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  @media (max-width: 860px) {
+    .table-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="kpi-page-header rv">
+  <div>
+    <h2>
+      <i
+        class="mdi mdi-view-dashboard-outline"
+        style="color: var(--acc); margin-right: 8px"
+      ></i
+      >Overview Dashboard
+    </h2>
+    <p>Real-time snapshot across suppliers, customers &amp; market</p>
+  </div>
+  <div style="display: flex; gap: 8px; align-items: center">
+    <div class="kpi-breadcrumb">
+      <a href="{% url 'dashboard' %}">Home</a>
+      <i class="mdi mdi-chevron-right"></i>
+      <span>Dashboard</span>
+    </div>
+    <button
+      class="kpi-btn kpi-btn-outline kpi-btn-sm"
+      onclick="location.reload()"
+    >
+      <i class="mdi mdi-refresh"></i> Refresh
+    </button>
+  </div>
+</div>
+
+<!-- KPI Cards -->
+<div class="kpi-ribbon">
+  <div class="kpi-stat primary rv d1">
+    <div class="kpi-stat-icon"><i class="mdi mdi-truck-outline"></i></div>
+    <div class="kpi-stat-value">{{ total_suppliers|default:0 }}</div>
+    <div class="kpi-stat-label">Total Suppliers</div>
+    <div class="kpi-stat-change up">
+      <i class="mdi mdi-arrow-up-thin"></i>{{ active_suppliers }} active
+    </div>
+    <i class="mdi mdi-truck kpi-stat-bg"></i>
+  </div>
+  <div class="kpi-stat success rv d2">
+    <div class="kpi-stat-icon"><i class="mdi mdi-star-check-outline"></i></div>
+    <div class="kpi-stat-value">{{ avg_supplier_score|default:0 }}</div>
+    <div class="kpi-stat-label">Avg Supplier Score</div>
+    <div class="kpi-stat-change up">
+      <i class="mdi mdi-arrow-up-thin"></i>{{ excellent_suppliers }} excellent
+    </div>
+    <i class="mdi mdi-star kpi-stat-bg"></i>
+  </div>
+  <div class="kpi-stat info rv d3">
+    <div class="kpi-stat-icon">
+      <i class="mdi mdi-account-group-outline"></i>
+    </div>
+    <div class="kpi-stat-value">{{ total_customers|default:0 }}</div>
+    <div class="kpi-stat-label">Customers</div>
+    <div
+      class="kpi-stat-change {% if avg_churn < 0.3 %}up{% else %}down{% endif %}"
+    >
+      {{ avg_churn|floatformat:0 }}% avg churn
+    </div>
+    <i class="mdi mdi-account-group kpi-stat-bg"></i>
+  </div>
+  <div class="kpi-stat warning rv d4">
+    <div class="kpi-stat-icon">
+      <i class="mdi mdi-package-variant-closed"></i>
+    </div>
+    <div class="kpi-stat-value">{{ inventory_count|default:0 }}</div>
+    <div class="kpi-stat-label">Inventory Items</div>
+    <div class="kpi-stat-change down">
+      <i class="mdi mdi-alert-outline"></i>{{ low_stock_items }} low stock
+    </div>
+    <i class="mdi mdi-package kpi-stat-bg"></i>
+  </div>
+  <div class="kpi-stat danger rv d5">
+    <div class="kpi-stat-icon">
+      <i class="mdi mdi-alert-circle-outline"></i>
+    </div>
+    <div class="kpi-stat-value">{{ total_complaints|default:0 }}</div>
+    <div class="kpi-stat-label">Complaints</div>
+    <div class="kpi-stat-change down">
+      <i class="mdi mdi-arrow-up-thin"></i>Active issues
+    </div>
+    <i class="mdi mdi-alert kpi-stat-bg"></i>
+  </div>
+  <div class="kpi-stat purple rv d5">
+    <div class="kpi-stat-icon">
+      <i class="mdi mdi-emoticon-happy-outline"></i>
+    </div>
+    <div class="kpi-stat-value">{{ sentiment_positive_rate|default:0 }}%</div>
+    <div class="kpi-stat-label">Positive Sentiment</div>
+    <div class="kpi-stat-change up">
+      <i class="mdi mdi-heart-outline"></i>{{ total_reviews }} reviews
+    </div>
+    <i class="mdi mdi-emoticon kpi-stat-bg"></i>
+  </div>
+</div>
+
+<!-- Charts Row 1 -->
+<div class="chart-row">
+  <div class="kpi-card rv">
+    <div class="kpi-card-header">
+      <span class="kpi-card-title"
+        ><i
+          class="mdi mdi-chart-donut"
+          style="color: var(--acc); margin-right: 6px"
+        ></i
+        >Supplier Performance</span
+      >
+      <span class="kpi-badge primary">{{ total_suppliers }} total</span>
+    </div>
+    <div class="kpi-card-body">
+      <div class="kpi-chart-wrap"><canvas id="perfChart"></canvas></div>
+      <div
+        style="
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 8px;
+          margin-top: 1rem;
+        "
+      >
+        <div
+          style="display: flex; align-items: center; gap: 6px; font-size: 11px"
+        >
+          <div
+            style="
+              width: 8px;
+              height: 8px;
+              border-radius: 2px;
+              background: #16a34a;
+            "
+          ></div>
+          <span style="color: var(--t2)"
+            >Excellent ({{ excellent_suppliers }})</span
+          >
         </div>
+        <div
+          style="display: flex; align-items: center; gap: 6px; font-size: 11px"
+        >
+          <div
+            style="
+              width: 8px;
+              height: 8px;
+              border-radius: 2px;
+              background: #0369a1;
+            "
+          ></div>
+          <span style="color: var(--t2)">Good ({{ good_suppliers }})</span>
+        </div>
+        <div
+          style="display: flex; align-items: center; gap: 6px; font-size: 11px"
+        >
+          <div
+            style="
+              width: 8px;
+              height: 8px;
+              border-radius: 2px;
+              background: #d97706;
+            "
+          ></div>
+          <span style="color: var(--t2)"
+            >Average ({{ average_suppliers }})</span
+          >
+        </div>
+        <div
+          style="display: flex; align-items: center; gap: 6px; font-size: 11px"
+        >
+          <div
+            style="
+              width: 8px;
+              height: 8px;
+              border-radius: 2px;
+              background: #c0392b;
+            "
+          ></div>
+          <span style="color: var(--t2)">Poor ({{ poor_suppliers }})</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        <!-- JS -->
-        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <div class="kpi-card rv d2">
+    <div class="kpi-card-header">
+      <span class="kpi-card-title"
+        ><i
+          class="mdi mdi-truck-check"
+          style="color: var(--success); margin-right: 6px"
+        ></i
+        >Delivery Performance</span
+      >
+      <span class="kpi-badge success">{{ total_deliveries }} deliveries</span>
+    </div>
+    <div class="kpi-card-body">
+      <div class="kpi-chart-wrap"><canvas id="deliveryChart"></canvas></div>
+    </div>
+  </div>
 
-        <script src="assets/vendors/js/vendor.bundle.base.js"></script>
-        <script src="assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js"></script>
-        <!-- endinject -->
-        <!-- Plugin js for this page-->
+  <div class="kpi-card rv d3">
+    <div class="kpi-card-header">
+      <span class="kpi-card-title"
+        ><i class="mdi mdi-brain" style="color: #7c3aed; margin-right: 6px"></i
+        >Sentiment Distribution</span
+      >
+    </div>
+    <div class="kpi-card-body">
+      <div class="kpi-chart-wrap"><canvas id="sentimentChart"></canvas></div>
+    </div>
+  </div>
+</div>
 
-        <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<!-- Charts Row 2 -->
+<div class="chart-row" style="display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px;">
 
-        <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+  <div class="kpi-card rv" style="grid-column: span 12; border-radius: 16px; overflow: hidden;">
+    
+    <div class="kpi-card-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px;">
+      <span class="kpi-card-title">
+        <i class="mdi mdi-chart-line" style="color: var(--acc2); margin-right: 6px"></i>
+        Market Trend Analysis
+      </span>
+      <span class="kpi-badge primary">{{ market_trends }} trends</span>
+    </div>
 
-        <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+    <div class="kpi-card-body" style="padding: 20px 30px;">
+      
+      <div class="kpi-chart-wrap" style="width: 100%; height: 320px; display: flex; justify-content: center; align-items: center;">
+        <canvas id="marketChart" style="width: 100% !important;"></canvas>
+      </div>
 
-        <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+    </div>
+  </div>
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</div>
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-        <!-- End plugin js for this page-->
-        <!-- inject:js -->
-        <script src="assets/js/off-canvas.js"></script>
-        <script src="assets/js/hoverable-collapse.js"></script>
-        <script src="assets/js/template.js"></script>
-        <script src="assets/js/settings.js"></script>
-        <script src="assets/js/todolist.js"></script>
+<!-- Tables Row -->
+<div class="table-row">
+  <div class="kpi-card rv">
+    <div class="kpi-card-header">
+      <span class="kpi-card-title">Supplier Leaderboard</span>
+      <a
+        href="{% url 'supplierdashboard' %}"
+        class="kpi-btn kpi-btn-outline kpi-btn-sm"
+        >View all <i class="mdi mdi-arrow-right"></i
+      ></a>
+    </div>
+    <div class="kpi-card-body" style="padding: 0">
+      <table style="width: 100%; font-size: 13px; border-collapse: collapse">
+        <thead>
+          <tr style="background: var(--bg2)">
+            <th
+              style="
+                padding: 9px 16px;
+                text-align: left;
+                font-size: 10px;
+                font-weight: 700;
+                color: var(--t2);
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                border-bottom: 1px solid var(--line);
+                font-family: &quot;Barlow Condensed&quot;, sans-serif;
+              "
+            >
+              Supplier
+            </th>
+            <th
+              style="
+                padding: 9px 8px;
+                text-align: center;
+                font-size: 10px;
+                font-weight: 700;
+                color: var(--t2);
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                border-bottom: 1px solid var(--line);
+                font-family: &quot;Barlow Condensed&quot;, sans-serif;
+              "
+            >
+              Score
+            </th>
+            <th
+              style="
+                padding: 9px 16px;
+                text-align: right;
+                font-size: 10px;
+                font-weight: 700;
+                color: var(--t2);
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                border-bottom: 1px solid var(--line);
+                font-family: &quot;Barlow Condensed&quot;, sans-serif;
+              "
+            >
+              Rating
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in supplier_scores|slice:":8" %}
+          <tr style="border-bottom: 1px solid var(--line)">
+            <td style="padding: 10px 16px">
+              <div
+                style="
+                  font-weight: 600;
+                  color: var(--t1);
+                  font-family: &quot;Barlow Condensed&quot;, sans-serif;
+                  font-size: 14px;
+                "
+              >
+                {{ s.supplier.name }}
+              </div>
+              <div style="font-size: 11px; color: var(--t2)">
+                {{ s.supplier.company_name }}
+              </div>
+            </td>
+            <td style="padding: 10px 8px; text-align: center">
+              <div
+                style="
+                  font-weight: 800;
+                  font-size: 15px;
+                  color: var(--t1);
+                  font-family: &quot;Barlow Condensed&quot;, sans-serif;
+                "
+              >
+                {{ s.final_score|floatformat:1 }}
+              </div>
+              <div
+                class="kpi-progress"
+                style="margin-top: 3px; width: 60px; margin-inline: auto"
+              >
+                <div
+                  class="kpi-progress-bar"
+                  style="width:{{ s.final_score }}%;background:{% if s.final_score >= 85 %}var(--success){% elif s.final_score >= 70 %}var(--info){% elif s.final_score >= 50 %}var(--warning){% else %}var(--danger){% endif %};"
+                ></div>
+              </div>
+            </td>
+            <td style="padding: 10px 16px; text-align: right">
+              {% if s.rating_category == "Excellent" %}<span
+                class="kpi-badge success"
+                >Excellent</span
+              >
+              {% elif s.rating_category == "Good" %}<span class="kpi-badge info"
+                >Good</span
+              >
+              {% elif s.rating_category == "Average" %}<span
+                class="kpi-badge warning"
+                >Average</span
+              >
+              {% else %}<span class="kpi-badge danger">Poor</span>{% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td
+              colspan="3"
+              style="padding: 2rem; text-align: center; color: var(--t2)"
+            >
+              No data available
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-        <script>
-            $(document).ready(function(){
-            
-            const tableButtons = [
-            { extend:"copy", className:"btn btn-secondary btn-sm" },
-            { extend:"excel", className:"btn btn-success btn-sm" },
-            { extend:"csv", className:"btn btn-primary btn-sm" },
-            { extend:"pdf", className:"btn btn-danger btn-sm" },
-            { extend:"print", className:"btn btn-dark btn-sm" }
-            ];
-            
-            function initTable(id){
-            
-            if($(id).length){
-            
-            $(id).DataTable({
-            pageLength:10,
-            lengthMenu:[10,20,50,100],
-            dom:"Bfrtip",
-            buttons:tableButtons
-            });
-            
-            }
-            
-            }
-            
-            initTable("#deliveryTable");
-            initTable("#suppliersTable");
-            initTable("#reviewsTable");
-            initTable("#complaintsTable");
-            initTable("#sentimentTable");
-            
-            });
-        </script>
+  <div class="kpi-card rv d2">
+    <div class="kpi-card-header">
+      <span class="kpi-card-title">Recent Sentiments</span>
+      <a
+        href="{% url 'supplierdashboard' %}"
+        class="kpi-btn kpi-btn-outline kpi-btn-sm"
+        >View all</a
+      >
+    </div>
+    <div class="kpi-card-body" style="padding: 0">
+      <table style="width: 100%; font-size: 13px; border-collapse: collapse">
+        <thead>
+          <tr style="background: var(--bg2)">
+            <th
+              style="
+                padding: 9px 16px;
+                font-size: 10px;
+                font-weight: 700;
+                color: var(--t2);
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                border-bottom: 1px solid var(--line);
+                font-family: &quot;Barlow Condensed&quot;, sans-serif;
+              "
+            >
+              Supplier
+            </th>
+            <th
+              style="
+                padding: 9px 16px;
+                font-size: 10px;
+                font-weight: 700;
+                color: var(--t2);
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                border-bottom: 1px solid var(--line);
+                font-family: &quot;Barlow Condensed&quot;, sans-serif;
+              "
+            >
+              Source
+            </th>
+            <th
+              style="
+                padding: 9px 16px;
+                text-align: right;
+                font-size: 10px;
+                font-weight: 700;
+                color: var(--t2);
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                border-bottom: 1px solid var(--line);
+                font-family: &quot;Barlow Condensed&quot;, sans-serif;
+              "
+            >
+              Sentiment
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in sentiments|slice:":8" %}
+          <tr style="border-bottom: 1px solid var(--line)">
+            <td
+              style="
+                padding: 10px 16px;
+                font-weight: 600;
+                font-family: &quot;Barlow Condensed&quot;, sans-serif;
+                font-size: 14px;
+              "
+            >
+              {{ s.supplier.name|truncatechars:20 }}
+            </td>
+            <td style="padding: 10px 16px; color: var(--t2)">
+              {{ s.source_type|title }}
+            </td>
+            <td style="padding: 10px 16px; text-align: right">
+              {% if s.sentiment_label == "Positive" %}<span
+                class="kpi-badge success"
+                ><i class="mdi mdi-emoticon-happy-outline"></i> Positive</span
+              >
+              {% elif s.sentiment_label == "Negative" %}<span
+                class="kpi-badge danger"
+                ><i class="mdi mdi-emoticon-sad-outline"></i> Negative</span
+              >
+              {% else %}<span class="kpi-badge warning">Neutral</span>{% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td
+              colspan="3"
+              style="padding: 2rem; text-align: center; color: var(--t2)"
+            >
+              No sentiments recorded
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
-        <!-- Charts -->
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-        <!-- Calendar -->
-        <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
-
-
-        <script>
-            document.addEventListener("DOMContentLoaded", function(){
-            
-            // =========================
-            // SAFE CHART CREATOR
-            // =========================
-            
-            function createChart(id, type, labels, data){
-            
-            const canvas = document.getElementById(id);
-            
-            if(!canvas) return;
-            
-            new Chart(canvas, {
-            
-            type: type,
-            
-            data: {
-            
-            labels: labels,
-            
-            datasets: [{
-            
-            data: data,
-            
-            backgroundColor: [
-            
-            'rgba(75,192,192,0.7)',
-            
-            'rgba(255,206,86,0.7)',
-            
-            'rgba(255,99,132,0.7)',
-            
-            'rgba(54,162,235,0.7)'
-            
-            ],
-            
-            borderWidth:1
-            
-            }]
-            
-            },
-            
-            options: {
-            
-            responsive:true,
-            
-            plugins:{
-            
-            legend:{ position:'top'}
-            
-            }
-            
-            }
-            
-            });
-            
-            }
-            
-            
-            
-            // =========================
-            // CHARTS
-            // =========================
-            
-            createChart(
-            
-            "sentimentChart",
-            
-            "doughnut",
-            
-            ["Positive","Neutral","Negative"],
-            
-            [
-            
-            {{ positive_sentiments|default:0 }},
-            
-            {{ neutral_sentiments|default:0 }},
-            
-            {{ negative_sentiments|default:0 }}
-            
-            ]
-            
-            );
-            
-            
-            
-            createChart(
-            
-            "deliveryChart",
-            
-            "bar",
-            
-            {{ delivery_labels|safe }},
-            
-            {{ delivery_values|safe }}
-            
-            );
-            
-            
-            
-            createChart(
-            
-            "inventoryChart",
-            
-            "pie",
-            
-            {{ inventory_chart_labels|safe }},
-            
-            {{ inventory_chart_values|safe }}
-            
-            );
-            
-            
-            
-            createChart(
-            
-            "churnChart",
-            
-            "bar",
-            
-            {{ churn_labels|safe }},
-            
-            {{ churn_values|safe }}
-            
-            );
-            
-            
-            
-            createChart(
-            
-            "marketTrendChart",
-            
-            "line",
-            
-            {{ trend_labels|safe }},
-            
-            {{ trend_values|safe }}
-            
-            );
-            
-            
-            
-            createChart(
-            
-            "indicatorChart",
-            
-            "doughnut",
-            
-            {{ indicator_labels|safe }},
-            
-            {{ indicator_values|safe }}
-            
-            );
-            
-            
-            
-            // =========================
-            // FULL CALENDAR
-            // =========================
-            
-            const calendarEl = document.getElementById("calendar");
-            
-            if(calendarEl){
-            
-            const calendar = new FullCalendar.Calendar(calendarEl,{
-            
-            initialView:'dayGridMonth',
-            
-            events: {{ calendar_events|safe }}
-            
-            });
-            
-            calendar.render();
-            
-            }
-            
-            
-            
-            // =========================
-            // DATATABLES
-            // =========================
-            
-            
-            });
-        </script>
+<!-- Deliveries Table -->
+<div class="kpi-card rv" style="margin-bottom: 1.5rem">
+  <div class="kpi-card-header">
+    <span class="kpi-card-title"
+      ><i
+        class="mdi mdi-truck-delivery-outline"
+        style="margin-right: 6px; color: var(--acc)"
+      ></i
+      >Delivery Log</span
+    >
+    <a href="{% url 'delivery' %}" class="kpi-btn kpi-btn-primary kpi-btn-sm"
+      ><i class="mdi mdi-plus"></i> Record Delivery</a
+    >
+  </div>
+  <div class="kpi-card-body">
+    <div class="kpi-table-wrap">
+      <table id="deliveryTable" class="table">
+        <thead>
+          <tr>
+            <th>Supplier</th>
+            <th>Order #</th>
+            <th>Category</th>
+            <th>Ordered</th>
+            <th>Delivered</th>
+            <th>Status</th>
+            <th>Condition</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in deliveries %}
+          <tr>
+            <td>{{ d.supplier.name }}</td>
+            <td>
+              <code
+                style="
+                  font-size: 11px;
+                  background: var(--bg2);
+                  padding: 2px 6px;
+                  border-radius: 4px;
+                  font-family: &quot;DM Mono&quot;, monospace;
+                "
+                >{{ d.order_number }}</code
+              >
+            </td>
+            <td>{{ d.product_category }}</td>
+            <td>{{ d.quantity_ordered }}</td>
+            <td>{{ d.quantity_delivered }}</td>
+            <td>
+              {% if d.delivery_status == "ON_TIME" %}<span
+                class="kpi-badge success"
+                ><i class="mdi mdi-check-circle-outline"></i> On Time</span
+              >
+              {% elif d.delivery_status == "LATE" %}<span
+                class="kpi-badge danger"
+                ><i class="mdi mdi-clock-alert-outline"></i> Late</span
+              >
+              {% else %}<span class="kpi-badge info"
+                ><i class="mdi mdi-clock-fast"></i> Early</span
+              >{% endif %}
+            </td>
+            <td>
+              {% if d.condition_status == "GOOD" %}<span
+                class="kpi-badge success"
+                >Good</span
+              >
+              {% elif d.condition_status == "DAMAGED" %}<span
+                class="kpi-badge danger"
+                >Damaged</span
+              >
+              {% else %}<span class="kpi-badge warning">Partial</span>{% endif %}
+            </td>
+            <td style="color: var(--t2)">{{ d.actual_delivery_date }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  $(document).ready(function(){
+    kpiTable('#deliveryTable');
+    const WARM=['#c0392b','#e85d04','#d97706','#16a34a'];
+    new Chart(document.getElementById('perfChart'),{type:'doughnut',data:{labels:['Excellent','Good','Average','Poor'],datasets:[{data:[{{ excellent_suppliers|default:0 }},{{ good_suppliers|default:0 }},{{ average_suppliers|default:0 }},{{ poor_suppliers|default:0 }}],backgroundColor:['#16a34a','#0369a1','#d97706','#c0392b'],borderWidth:0,hoverOffset:6}]},options:{cutout:'72%',plugins:{legend:{display:false}}}});
+    new Chart(document.getElementById('deliveryChart'),{type:'bar',data:{labels:{{ delivery_labels|safe }},datasets:[{label:'Deliveries',data:{{ delivery_values|safe }},backgroundColor:['#16a34a','#d97706','#0369a1'],borderRadius:6,borderSkipped:false}]},options:{scales:{y:{beginAtZero:true,grid:{color:'rgba(90,70,50,0.05)'}},x:{grid:{display:false}}},plugins:{legend:{display:false}}}});
+    new Chart(document.getElementById('sentimentChart'),{type:'pie',data:{labels:['Positive','Neutral','Negative'],datasets:[{data:[{{ positive_sentiments|default:0 }},{{ neutral_sentiments|default:0 }},{{ negative_sentiments|default:0 }}],backgroundColor:['#16a34a','#d97706','#c0392b'],borderWidth:0}]},options:{plugins:{legend:{position:'bottom'}}}});
+  new Chart(document.getElementById('marketChart'), {
+  type: 'line',
+  data: {
+    labels: {{ trend_labels|safe }},
+    datasets: [{
+      label: 'Trend Count',
+      data: {{ trend_values|safe }},
+      borderColor: '#c0392b',
+      backgroundColor: 'rgba(192,57,43,0.06)',
+      borderWidth: 2,
+      fill: true,
+      tension: .4,
+      pointRadius: 4,
+      pointBackgroundColor: '#c0392b'
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false, // 🔥 key fix
+    layout: {
+      padding: {
+        left: 20,
+        right: 20
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: { color: 'rgba(90,70,50,0.05)' }
+      },
+      x: {
+        grid: { display: false }
+      }
+    },
+    plugins: {
+      legend: { display: false }
+    }
+  }
+});
+  
+  
+  });
 
 
-</body>
 
-</html>
+</script>
+{% endblock %}

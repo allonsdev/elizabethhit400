@@ -1,0 +1,132 @@
+{% comment %} 404.html — Place in your templates root {% endcomment %}
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>404 — Page Not Found | SupplyInsight</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Inter',sans-serif;background:#f1f5f9;display:flex;align-items:center;justify-content:center;min-height:100vh;overflow:hidden;}
+    canvas{position:fixed;inset:0;pointer-events:none;}
+    .error-wrap{position:relative;z-index:1;text-align:center;padding:2rem;}
+    .error-code{
+      font-size:8rem;font-weight:800;letter-spacing:-0.04em;line-height:1;
+      background:linear-gradient(135deg,#4f46e5,#0ea5e9);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      margin-bottom:1rem;
+    }
+    .error-icon{font-size:3rem;margin-bottom:1rem;display:block;}
+    h1{font-size:1.5rem;font-weight:700;color:#0f172a;margin-bottom:8px;}
+    p{color:#64748b;font-size:14px;max-width:420px;margin:0 auto 2rem;line-height:1.6;}
+    .btn-home{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:12px 24px;
+      background:linear-gradient(135deg,#4f46e5,#0ea5e9);
+      color:white;border-radius:10px;font-size:14px;font-weight:700;
+      text-decoration:none;transition:opacity 0.2s;
+    }
+    .btn-home:hover{opacity:0.88;}
+    .btn-back{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:12px 24px;
+      border:1.5px solid rgba(15,23,42,0.1);background:white;
+      color:#0f172a;border-radius:10px;font-size:14px;font-weight:600;
+      text-decoration:none;margin-left:10px;transition:border-color 0.2s;
+    }
+    .btn-back:hover{border-color:#4f46e5;color:#4f46e5;}
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div class="error-wrap">
+    <div class="error-code">404</div>
+    <span class="error-icon">🔍</span>
+    <h1>Page Not Found</h1>
+    <p>The page you're looking for doesn't exist or has been moved. Check the URL or navigate back to the dashboard.</p>
+    <a href="{% url 'dashboard' %}" class="btn-home">
+      <i class="mdi mdi-view-dashboard-outline"></i> Go to Dashboard
+    </a>
+    <a href="javascript:history.back()" class="btn-back">
+      <i class="mdi mdi-arrow-left"></i> Go Back
+    </a>
+  </div>
+  <script>
+  (function(){
+    const c=document.getElementById('c'),ctx=c.getContext('2d');
+    let W,H,S=[];
+    function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;}
+    function Sphere(){this.x=Math.random()*W;this.y=Math.random()*H;this.r=50+Math.random()*140;this.dx=(Math.random()-0.5)*0.3;this.dy=(Math.random()-0.5)*0.3;this.hue=200+Math.floor(Math.random()*80);this.a=0.03+Math.random()*0.04;}
+    Sphere.prototype.update=function(){this.x+=this.dx;this.y+=this.dy;if(this.x<-this.r)this.x=W+this.r;if(this.x>W+this.r)this.x=-this.r;if(this.y<-this.r)this.y=H+this.r;if(this.y>H+this.r)this.y=-this.r;};
+    Sphere.prototype.draw=function(){const g=ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.r);g.addColorStop(0,`hsla(${this.hue},70%,65%,${this.a})`);g.addColorStop(1,`hsla(${this.hue},50%,45%,0)`);ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();};
+    function tick(){ctx.clearRect(0,0,W,H);S.forEach(s=>{s.update();s.draw();});requestAnimationFrame(tick);}
+    window.addEventListener('resize',resize);resize();
+    S=Array.from({length:14},()=>new Sphere());tick();
+  })();
+  </script>
+</body>
+</html>
+
+
+{% comment %} 403.html {% endcomment %}
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>403 — Access Denied | SupplyInsight</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Inter',sans-serif;background:#f1f5f9;display:flex;align-items:center;justify-content:center;min-height:100vh;overflow:hidden;}
+    canvas{position:fixed;inset:0;pointer-events:none;}
+    .error-wrap{position:relative;z-index:1;text-align:center;padding:2rem;}
+    .error-code{
+      font-size:8rem;font-weight:800;letter-spacing:-0.04em;line-height:1;
+      background:linear-gradient(135deg,#ef4444,#f59e0b);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      margin-bottom:1rem;
+    }
+    .error-icon{font-size:3rem;margin-bottom:1rem;display:block;}
+    h1{font-size:1.5rem;font-weight:700;color:#0f172a;margin-bottom:8px;}
+    p{color:#64748b;font-size:14px;max-width:420px;margin:0 auto 2rem;line-height:1.6;}
+    .btn-home{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:linear-gradient(135deg,#4f46e5,#0ea5e9);color:white;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;transition:opacity 0.2s;}
+    .btn-home:hover{opacity:0.88;}
+    .btn-back{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border:1.5px solid rgba(15,23,42,0.1);background:white;color:#0f172a;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;margin-left:10px;transition:border-color 0.2s;}
+    .btn-back:hover{border-color:#4f46e5;color:#4f46e5;}
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div class="error-wrap">
+    <div class="error-code">403</div>
+    <span class="error-icon">🔒</span>
+    <h1>Access Denied</h1>
+    <p>You don't have permission to view this page. Please contact your administrator if you believe this is an error.</p>
+    <a href="{% url 'dashboard' %}" class="btn-home">
+      <i class="mdi mdi-view-dashboard-outline"></i> Go to Dashboard
+    </a>
+    <a href="{% url 'login' %}" class="btn-back">
+      <i class="mdi mdi-login"></i> Sign In Again
+    </a>
+  </div>
+  <script>
+  (function(){
+    const c=document.getElementById('c'),ctx=c.getContext('2d');
+    let W,H,S=[];
+    function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;}
+    function Sphere(){this.x=Math.random()*W;this.y=Math.random()*H;this.r=50+Math.random()*140;this.dx=(Math.random()-0.5)*0.3;this.dy=(Math.random()-0.5)*0.3;this.hue=0+Math.floor(Math.random()*30);this.a=0.03+Math.random()*0.04;}
+    Sphere.prototype.update=function(){this.x+=this.dx;this.y+=this.dy;if(this.x<-this.r)this.x=W+this.r;if(this.x>W+this.r)this.x=-this.r;if(this.y<-this.r)this.y=H+this.r;if(this.y>H+this.r)this.y=-this.r;};
+    Sphere.prototype.draw=function(){const g=ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.r);g.addColorStop(0,`hsla(${this.hue},70%,65%,${this.a})`);g.addColorStop(1,`hsla(${this.hue},50%,45%,0)`);ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();};
+    function tick(){ctx.clearRect(0,0,W,H);S.forEach(s=>{s.update();s.draw();});requestAnimationFrame(tick);}
+    window.addEventListener('resize',resize);resize();
+    S=Array.from({length:14},()=>new Sphere());tick();
+  })();
+  </script>
+</body>
+</html>

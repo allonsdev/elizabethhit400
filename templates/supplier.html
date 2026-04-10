@@ -1,0 +1,107 @@
+{% comment %} supplier_manage.html {% endcomment %}
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Supplier Management{% endblock %}
+{% block page_title %}Supplier Management{% endblock %}
+{% block page_subtitle %}View, search and manage all registered suppliers{% endblock %}
+
+{% block content %}
+<div class="si-page-header">
+  <div>
+    <h2><i class="mdi mdi-domain" style="color:var(--si-primary);margin-right:8px;"></i>Supplier Management</h2>
+    <p>Complete supplier registry with search and filtering</p>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <div class="si-breadcrumb">
+      <a href="{% url 'dashboard' %}">Home</a>
+      <i class="mdi mdi-chevron-right"></i>
+      <span>Suppliers</span>
+    </div>
+    <a href="{% url 'register' %}" class="si-btn si-btn-primary si-btn-sm">
+      <i class="mdi mdi-plus"></i> Register Supplier
+    </a>
+  </div>
+</div>
+
+<!-- KPI Strip -->
+<div class="si-stat-grid" style="margin-bottom:1.5rem;">
+  <div class="si-stat primary">
+    <div class="si-stat-icon"><i class="mdi mdi-domain"></i></div>
+    <div class="si-stat-value">{{ suppliers|length }}</div>
+    <div class="si-stat-label">Total Suppliers</div>
+    <i class="mdi mdi-domain si-stat-bg"></i>
+  </div>
+  <div class="si-stat success">
+    <div class="si-stat-icon"><i class="mdi mdi-check-circle-outline"></i></div>
+    <div class="si-stat-value">{% with active=0 %}{% for s in suppliers %}{% if s.is_active %}{% with active=active|add:1 %}{% endwith %}{% endif %}{% endfor %}{{ suppliers|length }}{% endwith %}</div>
+    <div class="si-stat-label">Active Suppliers</div>
+    <i class="mdi mdi-check si-stat-bg"></i>
+  </div>
+</div>
+
+<!-- Suppliers Table -->
+<div class="si-card">
+  <div class="si-card-header">
+    <span class="si-card-title"><i class="mdi mdi-format-list-bulleted" style="margin-right:6px;color:var(--si-primary);"></i>All Suppliers</span>
+    <div style="display:flex;gap:8px;">
+      <a href="{% url 'register' %}" class="si-btn si-btn-primary si-btn-sm">
+        <i class="mdi mdi-plus"></i> Add New
+      </a>
+    </div>
+  </div>
+  <div class="si-card-body">
+    <div class="si-table-wrap">
+      <table id="manageTable" class="table">
+        <thead>
+          <tr>
+            <th>Code</th><th>Name</th><th>Company</th><th>Contact</th>
+            <th>Email</th><th>Phone</th><th>Location</th>
+            <th>Tax #</th><th>Reg #</th><th>Status</th><th>Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in suppliers %}
+          <tr>
+            <td><code style="font-size:11px;background:#f1f5f9;padding:2px 6px;border-radius:4px;">{{ s.supplier_code }}</code></td>
+            <td style="font-weight:600;">{{ s.name }}</td>
+            <td>{{ s.company_name }}</td>
+            <td>{{ s.contact_person }}</td>
+            <td>
+              {% if s.email %}
+              <a href="mailto:{{ s.email }}" style="color:var(--si-primary);text-decoration:none;font-size:12px;">{{ s.email }}</a>
+              {% else %}—{% endif %}
+            </td>
+            <td>{{ s.phone }}</td>
+            <td>
+              <span style="display:flex;align-items:center;gap:4px;font-size:12px;">
+                <i class="mdi mdi-map-marker-outline" style="color:var(--si-text-muted);font-size:13px;"></i>{{ s.location }}
+              </span>
+            </td>
+            <td style="font-size:12px;color:var(--si-text-muted);">{{ s.tax_number|default:"—" }}</td>
+            <td style="font-size:12px;color:var(--si-text-muted);">{{ s.registration_number|default:"—" }}</td>
+            <td>
+              {% if s.is_active %}
+                <span class="si-badge success"><i class="mdi mdi-circle" style="font-size:8px;"></i> Active</span>
+              {% else %}
+                <span class="si-badge danger"><i class="mdi mdi-circle" style="font-size:8px;"></i> Inactive</span>
+              {% endif %}
+            </td>
+            <td style="color:var(--si-text-muted);font-size:12px;">{{ s.created_at|date:"M d, Y" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="11" style="padding:3rem;text-align:center;color:var(--si-text-muted);">
+            <i class="mdi mdi-domain-off" style="font-size:36px;display:block;margin-bottom:8px;opacity:0.3;"></i>
+            No suppliers registered yet.
+            <a href="{% url 'register' %}" style="color:var(--si-primary);">Register the first supplier →</a>
+          </td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>$(document).ready(function(){ siTable('#manageTable'); });</script>
+{% endblock %}

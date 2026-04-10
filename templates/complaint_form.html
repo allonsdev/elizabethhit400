@@ -1,47 +1,129 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Supplier Complaint</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-<div class="container py-4">
-    <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">Record Supplier Complaint</h4>
-        </div>
-        <div class="card-body">
-                         {% if messages %}
-        <div class="alert-container">
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-            <form method="post">
-                {% csrf_token %}
-                <div class="mb-3">
-                    <label class="form-label">Supplier</label>
-                    <select class="form-select" name="supplier" required>
-                        <option value="">Select Supplier</option>
-                        {% for supplier in suppliers %}
-                            <option value="{{ supplier.id }}">{{ supplier.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Complaint Description</label>
-                    <textarea class="form-control" name="description" rows="4" placeholder="Describe the issue..."></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Record Complaint</button>
-            </form>
-        </div>
-    </div>
+{% extends "base.html" %} {% load static %} {% block title %}Log Complaint{% endblock %} {% block page_title %}Log Complaint{% endblock %} {% block page_subtitle %}Record supplier issues
+and escalations{% endblock %} {% block content %}
+<div class="kpi-page-header rv">
+  <div>
+    <h2>
+      <i
+        class="mdi mdi-alert-circle-outline"
+        style="color: var(--danger); margin-right: 8px"
+      ></i
+      >Log Supplier Complaint
+    </h2>
+    <p>Document issues with supplier performance, quality or service</p>
+  </div>
+  <div class="kpi-breadcrumb">
+    <a href="{% url 'dashboard' %}">Home</a><i class="mdi mdi-chevron-right"></i
+    ><a href="{% url 'supplierdashboard' %}">Suppliers</a
+    ><i class="mdi mdi-chevron-right"></i><span>Complaint</span>
+  </div>
 </div>
-</body>
-</html>
+
+<div style="max-width: 640px">
+  <div class="kpi-card rv">
+    <div
+      class="kpi-card-header"
+      style="
+        background: rgba(192, 57, 43, 0.04);
+        border-bottom: 1px solid rgba(192, 57, 43, 0.12);
+      "
+    >
+      <span class="kpi-card-title" style="color: var(--danger)"
+        ><i class="mdi mdi-alert-circle" style="margin-right: 6px"></i>Complaint
+        Details</span
+      >
+      <span class="kpi-badge danger">Negative Sentiment Trigger</span>
+    </div>
+    <div class="kpi-card-body">
+      <form method="post" id="complaintForm">
+        {% csrf_token %}
+        <div class="kpi-section-label" style="color: var(--danger)">
+          Supplier Selection
+        </div>
+        <div class="kpi-form-group">
+          <label class="kpi-label">Affected Supplier *</label>
+          <div class="kpi-input-group">
+            <span class="kpi-input-icon"><i class="mdi mdi-domain"></i></span>
+            <select
+              class="kpi-select"
+              name="supplier"
+              required
+              style="padding-left: 38px"
+            >
+              <option value="">— Select Supplier —</option>
+              {% for supplier in suppliers %}
+              <option value="{{ supplier.id }}">
+                {{ supplier.name }} ({{ supplier.company_name }})
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="kpi-section-label" style="color: var(--danger)">
+          Complaint Description
+        </div>
+        <div class="kpi-form-group">
+          <label class="kpi-label"
+            >Description *
+            <span
+              style="
+                font-weight: 400;
+                text-transform: none;
+                letter-spacing: 0;
+                color: var(--acc2);
+                margin-left: 6px;
+                font-size: 10px;
+              "
+              ><i class="mdi mdi-brain"></i> AI sentiment analysis applied</span
+            ></label
+          >
+          <textarea
+            class="kpi-textarea"
+            name="description"
+            rows="5"
+            placeholder="Describe the issue in detail: what happened, when it occurred, and the impact on operations…"
+            required
+          ></textarea>
+        </div>
+        <div
+          style="
+            background: rgba(192, 57, 43, 0.05);
+            border: 1px solid rgba(192, 57, 43, 0.15);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            margin-bottom: 1.25rem;
+          "
+        >
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              font-size: 13px;
+            "
+          >
+            <i
+              class="mdi mdi-information-outline"
+              style="color: var(--danger); font-size: 16px"
+            ></i>
+            <span style="color: var(--t2)"
+              >This complaint will be flagged as
+              <strong style="color: var(--danger)">Negative Sentiment</strong>
+              and will impact the supplier's performance score.</span
+            >
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 1.5rem">
+          <button type="submit" class="kpi-btn kpi-btn-danger kpi-btn-lg">
+            <i class="mdi mdi-send-outline"></i> Submit Complaint
+          </button>
+          <a
+            href="{% url 'supplierdashboard' %}"
+            class="kpi-btn kpi-btn-outline kpi-btn-lg"
+            ><i class="mdi mdi-arrow-left"></i> Cancel</a
+          >
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

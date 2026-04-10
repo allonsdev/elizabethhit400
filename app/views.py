@@ -61,6 +61,11 @@ from django.db.models import Sum, Count, Avg, F, ExpressionWrapper, DecimalField
 from django.db.models.functions import TruncMonth
 from .models import InventoryItem, Delivery
 
+OPENROUTER_API_KEY = getattr(settings, "OPENROUTER_API_KEY", "")
+OPENROUTER_URL     = "https://openrouter.ai/api/v1/chat/completions"
+OPENROUTER_MODEL   = getattr(settings, "OPENROUTER_MODEL", "mistralai/mistral-7b-instruct")
+
+
 
 
 def admin_dashboard(request):
@@ -957,21 +962,169 @@ def store_inventory(request):
     return render(request, "store_inventory.html", {"inventory": inventory})
 
 # Report & decision recommendations page
-def report_and_recommendations(request):
-    # Summaries from models
-    avg_supplier_rating = Review.objects.aggregate(Avg("rating"))
-    top_performers = Supplier.objects.annotate(review_count=Count("review")).order_by("-review_count")[:5]
 
-    context = {
-        "avg_supplier_rating": avg_supplier_rating,
-        "top_performers": top_performers
+def call_openrouter(system_prompt: str, user_prompt: str, max_tokens: int = 900) -> str:
+    """Call OpenRouter and return the assistant text, or an empty string on failure."""
+    if not OPENROUTER_API_KEY:
+        return ""
+    try:
+        resp = requests.post(
+            OPENROUTER_URL,
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "Content-Type": "application/json",
+                "HTTP-Referer": "https://kpifastfood.app",
+                "X-Title": "KPI Fastfood Analytics",
+            },
+            json={
+                "model": OPENROUTER_MODEL,
+                "max_tokens": max_tokens,
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user",   "content": user_prompt},
+                ],
+            },
+            timeout=30,
+        )
+        resp.raise_for_status()
+        return resp.json()["choices"][0]["message"]["content"].strip()
+    except Exception:
+        return ""
+ 
+ 
+def build_data_snapshot() -> dict:
+    """Aggregate key metrics from the database into a single dict for the AI prompt."""
+    # Supplier stats
+    supplier_total   = Supplier.objects.filter(is_active=True).count()
+    perf_scores      = SupplierPerformanceScore.objects.select_related("supplier")
+    avg_final_score  = perf_scores.aggregate(a=Avg("final_score"))["a"] or 0
+    avg_risk         = perf_scores.aggregate(a=Avg("risk_index"))["a"] or 0
+    avg_trust        = perf_scores.aggregate(a=Avg("trust_index"))["a"] or 0
+    high_risk_count  = perf_scores.filter(risk_index__gte=70).count()
+    rating_dist      = {
+        cat: perf_scores.filter(rating_category=cat).count()
+        for cat in ("Excellent", "Good", "Average", "Poor")
     }
+ 
+    # Delivery stats
+    total_deliveries  = Delivery.objects.count()
+    on_time_count     = Delivery.objects.filter(delivery_status="ON_TIME").count()
+    late_count        = Delivery.objects.filter(delivery_status="LATE").count()
+    damaged_count     = Delivery.objects.filter(condition_status="DAMAGED").count()
+    on_time_rate      = round((on_time_count / total_deliveries * 100) if total_deliveries else 0, 1)
+ 
+    # Complaints
+    total_complaints    = Complaint.objects.count()
+    unresolved          = Complaint.objects.filter(resolved=False).count()
+    high_severity       = Complaint.objects.filter(severity_level__gte=4).count()
+ 
+    # Customer reviews
+    review_count        = Review.objects.count()
+    avg_weighted_score  = Review.objects.aggregate(a=Avg("overall_weighted_score"))["a"] or 0
+    avg_nps             = Review.objects.aggregate(a=Avg("nps_score"))["a"] or 0
+ 
+    # Inventory
+    low_stock_count     = InventoryItem.objects.filter(
+        quantity_in_stock__lte=F("reorder_level"), is_active=True
+    ).count()
+ 
+    # Top suppliers by review volume
+    top_suppliers = list(
+        Supplier.objects.annotate(rc=Count("reviews"))
+        .order_by("-rc")[:5]
+        .values("name", "rc")
+    )
+ 
+    return {
+        "supplier_total":    supplier_total,
+        "avg_final_score":   round(avg_final_score, 1),
+        "avg_risk_index":    round(avg_risk, 1),
+        "avg_trust_index":   round(avg_trust, 1),
+        "high_risk_suppliers": high_risk_count,
+        "rating_distribution": rating_dist,
+        "total_deliveries":  total_deliveries,
+        "on_time_rate":      on_time_rate,
+        "late_deliveries":   late_count,
+        "damaged_deliveries": damaged_count,
+        "total_complaints":  total_complaints,
+        "unresolved_complaints": unresolved,
+        "high_severity_complaints": high_severity,
+        "customer_review_count": review_count,
+        "avg_weighted_customer_score": round(avg_weighted_score, 1),
+        "avg_nps": round(avg_nps, 1),
+        "low_stock_items": low_stock_count,
+        "top_suppliers_by_reviews": top_suppliers,
+    }
+ 
+ 
+def get_ai_insights(snapshot: dict) -> dict:
+    """
+    Ask the AI for four structured insight blocks.
+    Returns a dict with keys: summary, risks, opportunities, actions.
+    Falls back to empty strings when OpenRouter is unavailable.
+    """
+    SYSTEM = (
+        "You are an expert supply-chain and restaurant operations analyst. "
+        "Respond ONLY with a JSON object — no markdown, no preamble. "
+        "Keys: summary (2 sentences), risks (list of 3 strings), "
+        "opportunities (list of 3 strings), actions (list of 4 strings). "
+        "Be specific and reference the numbers provided."
+    )
+    USER = (
+        f"Here is today's KPI snapshot for a fast-food supply chain operation:\n"
+        f"{json.dumps(snapshot, indent=2)}\n\n"
+        "Provide a concise strategic analysis."
+    )
+    raw = call_openrouter(SYSTEM, USER, max_tokens=700)
+    if not raw:
+        return {"summary": "", "risks": [], "opportunities": [], "actions": []}
+    try:
+        # Strip any accidental markdown fences
+        clean = raw.strip().lstrip("```json").lstrip("```").rstrip("```").strip()
+        return json.loads(clean)
+    except (json.JSONDecodeError, KeyError):
+        return {"summary": raw, "risks": [], "opportunities": [], "actions": []}
+ 
+ 
+# ─────────────────────────────────────────────
+# Main view
+# ─────────────────────────────────────────────
+def report_and_recommendations(request):
+    snapshot = build_data_snapshot()
+    ai       = get_ai_insights(snapshot)
+ 
+    avg_supplier_rating = Review.objects.aggregate(
+        avg=Avg("overall_weighted_score")
+    )["avg"] or 0
+ 
+    top_performers = Supplier.objects.annotate(
+        review_count=Count("reviews")
+    ).order_by("-review_count")[:5]
+ 
+    decision_reports = DecisionRecommendation.objects.order_by("-created_at")[:12]
+ 
+    context = {
+        # existing
+        "avg_supplier_rating":  round(avg_supplier_rating, 1),
+        "top_performers":       top_performers,
+        "decision_count":       decision_reports.count(),
+        "decision_reports":     decision_reports,
+ 
+        # new AI + snapshot
+        "snapshot":             snapshot,
+        "ai_summary":           ai.get("summary", ""),
+        "ai_risks":             ai.get("risks", []),
+        "ai_opportunities":     ai.get("opportunities", []),
+        "ai_actions":           ai.get("actions", []),
+        "ai_available":         bool(OPENROUTER_API_KEY),
+        "generated_at":         timezone.now(),
+    }
+ 
     return render(request, "reports.html", context)
-
 # Performance benchmark page
 def performance_benchmark(request):
     benchmarks = Benchmark.objects.order_by("-score")
-    return render(request, "performance_benchmark.html", {"benchmarks": benchmarks})
+    return render(request, "benchmark.html", {"benchmarks": benchmarks})
 
 # Market industry and trends page
 def market_industry_trends(request):

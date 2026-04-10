@@ -138,3 +138,18 @@ MEDIA_ROOT = BASE_DIR / 'media'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
+
+OPENROUTER_API_KEY = "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"
+OPENROUTER_URL     = "https://openrouter.ai/api/v1/chat/completions"
+OPENROUTER_MODEL   = "openai/gpt-5.2"
+
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'your_email@gmail.com'
+EMAIL_HOST_PASSWORD = 'your_app_password'
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

@@ -1,144 +1,88 @@
-{% extends "base.html" %} {% load static %} {% block title %}Reports &
-Recommendations{% endblock %} {% block page_title %}Reports & AI
-Recommendations{% endblock %} {% block page_subtitle %}Decision intelligence,
-benchmarks and strategic insights{% endblock %} {% block extra_css %}
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Reports & Recommendations{% endblock %}
+{% block page_title %}Reports & AI Recommendations{% endblock %}
+{% block page_subtitle %}Decision intelligence, benchmarks and strategic insights{% endblock %}
+
+{% block extra_css %}
 <style>
-  .report-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-  .report-card {
-    background: var(--card);
-    border: 1px solid var(--line2);
-    border-radius: var(--radius);
-    padding: 1.5rem;
-    transition:
-      transform 0.2s,
-      box-shadow 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-  .report-card:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
-  }
-  .report-card::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--acc), var(--acc2));
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.4s;
-  }
-  .report-card:hover::after {
-    transform: scaleX(1);
-  }
-  .report-card-type {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 9px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 4px 10px;
-    border-radius: 20px;
-    margin-bottom: 12px;
-    font-family: "Barlow Condensed", sans-serif;
-  }
-  .report-card h3 {
-    font-family: "Barlow Condensed", sans-serif;
-    font-size: 16px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin-bottom: 8px;
-    color: var(--t1);
-  }
-  .report-card p {
-    font-size: 13px;
-    color: var(--t2);
-    line-height: 1.6;
-    margin-bottom: 12px;
-  }
-  .report-card .confidence {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 11px;
-    color: var(--t2);
-    font-family: "DM Mono", monospace;
-  }
-  .report-bg-icon {
-    position: absolute;
-    bottom: -16px;
-    right: -16px;
-    font-size: 80px;
-    opacity: 0.04;
-    color: var(--t1);
-  }
-  .insight-box {
-    background: var(--bg2);
-    border-radius: var(--radius-sm);
-    padding: 12px;
-    margin-bottom: 10px;
-    border-left: 3px solid var(--acc);
-    font-size: 12px;
-    color: var(--t2);
-    line-height: 1.6;
-  }
-  .action-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--line);
-    font-size: 13px;
-  }
-  .action-item:last-child {
-    border-bottom: none;
-  }
-  .action-bullet {
-    width: 20px;
-    height: 20px;
-    min-width: 20px;
-    border-radius: 50%;
-    background: var(--accL);
-    color: var(--acc);
-    font-size: 11px;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 1px;
-    font-family: "Barlow Condensed", sans-serif;
-  }
+  /* ─── Report cards ─── */
+  .report-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem;margin-bottom:1.5rem;}
+  .report-card{background:var(--card);border:1px solid var(--line2);border-radius:var(--radius);padding:1.5rem;transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden;}
+  .report-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);}
+  .report-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--acc),var(--acc2));transform:scaleX(0);transform-origin:left;transition:transform .4s;}
+  .report-card:hover::after{transform:scaleX(1);}
+  .report-card-type{display:inline-flex;align-items:center;gap:6px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:4px 10px;border-radius:20px;margin-bottom:12px;font-family:'Barlow Condensed',sans-serif;}
+  .report-card h3{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;color:var(--t1);}
+  .report-card p{font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:12px;}
+  .report-card .confidence{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t2);font-family:'DM Mono',monospace;}
+  .report-bg-icon{position:absolute;bottom:-16px;right:-16px;font-size:80px;opacity:.04;color:var(--t1);}
+  .insight-box{background:var(--bg2);border-radius:var(--radius-sm);padding:12px;margin-bottom:10px;border-left:3px solid var(--acc);font-size:12px;color:var(--t2);line-height:1.6;}
+  .action-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px;}
+  .action-item:last-child{border-bottom:none;}
+  .action-bullet{width:20px;height:20px;min-width:20px;border-radius:50%;background:var(--accL);color:var(--acc);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px;font-family:'Barlow Condensed',sans-serif;}
+
+  /* ─── AI Panel ─── */
+  .ai-panel{background:var(--card);border:1px solid var(--line2);border-radius:var(--radius);overflow:hidden;margin-bottom:1.5rem;box-shadow:var(--shadow);}
+  .ai-panel-header{padding:1rem 1.25rem;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(90deg,rgba(192,57,43,.05),transparent);}
+  .ai-header-left{display:flex;align-items:center;gap:10px;}
+  .ai-brain-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--acc),var(--acc2));border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;flex-shrink:0;}
+  .ai-panel-title{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--t1);}
+  .ai-panel-sub{font-size:11px;color:var(--t2);margin-top:1px;}
+  .ai-gen-tag{font-family:'DM Mono',monospace;font-size:10px;color:var(--t3);letter-spacing:.04em;}
+  .ai-panel-body{padding:1.5rem;}
+  .ai-summary-box{background:linear-gradient(135deg,rgba(192,57,43,.05),rgba(232,93,4,.03));border:1px solid rgba(192,57,43,.15);border-radius:var(--radius-sm);padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:14px;line-height:1.7;color:var(--t1);}
+  .ai-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;}
+  .ai-block{background:var(--bg2);border-radius:var(--radius-sm);padding:1rem;}
+  .ai-block-heading{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.75rem;display:flex;align-items:center;gap:6px;}
+  .ai-block-heading.risk-h{color:var(--danger);}
+  .ai-block-heading.opp-h{color:var(--success);}
+  .ai-block-heading.act-h{color:var(--acc);}
+  .ai-list{list-style:none;display:flex;flex-direction:column;gap:7px;}
+  .ai-list li{font-size:12px;color:var(--t2);line-height:1.5;display:flex;align-items:flex-start;gap:7px;}
+  .ai-list li::before{content:'';width:5px;height:5px;min-width:5px;border-radius:50%;margin-top:5px;}
+  .ai-list.risk-list li::before{background:var(--danger);}
+  .ai-list.opp-list  li::before{background:var(--success);}
+  .ai-list.act-list  li::before{background:var(--acc);}
+  .ai-unavailable{text-align:center;padding:2rem;color:var(--t2);}
+  .ai-unavailable i{font-size:36px;display:block;margin-bottom:8px;opacity:.3;}
+  .ai-unavailable p{font-size:13px;}
+  .ai-unavailable code{font-family:'DM Mono',monospace;font-size:11px;background:var(--bg2);padding:2px 6px;border-radius:4px;color:var(--acc);}
+
+  /* ─── Snapshot grid ─── */
+  .snap-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.75rem;margin-bottom:1.5rem;}
+  .snap-tile{background:var(--card);border:1px solid var(--line2);border-radius:var(--radius-sm);padding:.9rem 1rem;}
+  .snap-tile-val{font-family:'Barlow Condensed',sans-serif;font-size:1.7rem;font-weight:800;color:var(--t1);line-height:1;}
+  .snap-tile-val.danger{color:var(--danger);}
+  .snap-tile-val.success{color:var(--success);}
+  .snap-tile-val.warning{color:var(--warning);}
+  .snap-tile-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t2);margin-top:4px;}
+
+  /* ─── Refresh btn ─── */
+  .ai-refresh-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;font-size:11px;font-weight:700;font-family:'Barlow Condensed',sans-serif;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line2);background:var(--card);color:var(--t2);border-radius:var(--radius-sm);cursor:pointer;text-decoration:none;transition:all .2s;}
+  .ai-refresh-btn:hover{border-color:var(--acc);color:var(--acc);}
+  #ai-loading{display:none;align-items:center;justify-content:center;padding:2.5rem;flex-direction:column;gap:10px;}
+  .ai-spinner{width:30px;height:30px;border:2px solid var(--line2);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .ai-loading-text{font-size:12px;color:var(--t2);font-family:'DM Mono',monospace;}
 </style>
-{% endblock %} {% block content %}
+{% endblock %}
+
+{% block content %}
 <div class="kpi-page-header rv">
   <div>
-    <h2>
-      <i
-        class="mdi mdi-chart-bar"
-        style="color: var(--acc); margin-right: 8px"
-      ></i
-      >Reports &amp; AI Recommendations
-    </h2>
+    <h2><i class="mdi mdi-chart-bar" style="color:var(--acc);margin-right:8px"></i>Reports &amp; AI Recommendations</h2>
     <p>Decision intelligence powered by data analytics</p>
   </div>
   <div class="kpi-breadcrumb">
-    <a href="{% url 'dashboard' %}">Home</a><i class="mdi mdi-chevron-right"></i
-    ><span>Reports</span>
+    <a href="{% url 'dashboard' %}">Home</a>
+    <i class="mdi mdi-chevron-right"></i>
+    <span>Reports</span>
   </div>
 </div>
 
-<div class="kpi-stat-grid" style="margin-bottom: 1.5rem">
+<!-- ── Stat cards ── -->
+<div class="kpi-stat-grid" style="margin-bottom:1.5rem">
   <div class="kpi-stat primary rv d1">
     <div class="kpi-stat-icon"><i class="mdi mdi-file-chart-outline"></i></div>
     <div class="kpi-stat-value">{{ decision_count|default:0 }}</div>
@@ -157,336 +101,227 @@ benchmarks and strategic insights{% endblock %} {% block extra_css %}
     <div class="kpi-stat-label">Top Performers Tracked</div>
     <i class="mdi mdi-trophy kpi-stat-bg"></i>
   </div>
+  <div class="kpi-stat warning rv d4">
+    <div class="kpi-stat-icon"><i class="mdi mdi-alert-outline"></i></div>
+    <div class="kpi-stat-value">{{ snapshot.unresolved_complaints|default:0 }}</div>
+    <div class="kpi-stat-label">Unresolved Complaints</div>
+    <i class="mdi mdi-alert kpi-stat-bg"></i>
+  </div>
+  <div class="kpi-stat danger rv d5">
+    <div class="kpi-stat-icon"><i class="mdi mdi-package-down"></i></div>
+    <div class="kpi-stat-value">{{ snapshot.low_stock_items|default:0 }}</div>
+    <div class="kpi-stat-label">Low Stock Items</div>
+    <i class="mdi mdi-package-variant-closed kpi-stat-bg"></i>
+  </div>
 </div>
 
-{% if decision_reports %}
-<div class="kpi-section-label">
-  <i class="mdi mdi-brain"></i> AI Decision Reports
+<!-- ── Live Snapshot tiles ── -->
+<div class="kpi-section-label rv"><i class="mdi mdi-pulse"></i> Live Data Snapshot</div>
+<div class="snap-grid rv">
+  <div class="snap-tile">
+    <div class="snap-tile-val">{{ snapshot.supplier_total }}</div>
+    <div class="snap-tile-label">Active Suppliers</div>
+  </div>
+  <div class="snap-tile">
+    <div class="snap-tile-val {% if snapshot.on_time_rate >= 80 %}success{% elif snapshot.on_time_rate >= 60 %}warning{% else %}danger{% endif %}">{{ snapshot.on_time_rate }}%</div>
+    <div class="snap-tile-label">On-Time Rate</div>
+  </div>
+  <div class="snap-tile">
+    <div class="snap-tile-val {% if snapshot.avg_final_score >= 70 %}success{% elif snapshot.avg_final_score >= 50 %}warning{% else %}danger{% endif %}">{{ snapshot.avg_final_score }}</div>
+    <div class="snap-tile-label">Avg Perf Score</div>
+  </div>
+  <div class="snap-tile">
+    <div class="snap-tile-val {% if snapshot.high_risk_suppliers == 0 %}success{% elif snapshot.high_risk_suppliers <= 2 %}warning{% else %}danger{% endif %}">{{ snapshot.high_risk_suppliers }}</div>
+    <div class="snap-tile-label">High-Risk Suppliers</div>
+  </div>
+  <div class="snap-tile">
+    <div class="snap-tile-val">{{ snapshot.avg_nps }}</div>
+    <div class="snap-tile-label">Avg NPS Score</div>
+  </div>
+  <div class="snap-tile">
+    <div class="snap-tile-val">{{ snapshot.customer_review_count }}</div>
+    <div class="snap-tile-label">Customer Reviews</div>
+  </div>
+  <div class="snap-tile">
+    <div class="snap-tile-val">{{ snapshot.total_deliveries }}</div>
+    <div class="snap-tile-label">Total Deliveries</div>
+  </div>
+  <div class="snap-tile">
+    <div class="snap-tile-val {% if snapshot.damaged_deliveries == 0 %}success{% else %}danger{% endif %}">{{ snapshot.damaged_deliveries }}</div>
+    <div class="snap-tile-label">Damaged Deliveries</div>
+  </div>
 </div>
-<div class="report-grid">
-  {% for report in decision_reports %}
-  <div class="report-card rv">
-    <div
-      class="report-card-type {% if report.report_type == 'risk' %}"
-      style="background: rgba(192, 57, 43, 0.1); color: #7f1d1d"
-    >
-      <i class="mdi mdi-shield-alert-outline"></i> Risk Analysis{% elif
-      report.report_type == 'performance' %}"
-      style="background:rgba(22,163,74,.1);color:#14532d;"><i
-        class="mdi mdi-chart-line"
-      ></i>
-      Performance{% elif report.report_type == 'inventory' %}"
-      style="background:rgba(217,119,6,.1);color:#92400e;"><i
-        class="mdi mdi-package-variant-closed"
-      ></i>
-      Inventory{% else %}"
-      style="background:rgba(124,58,237,.1);color:#5b21b6;"><i
-        class="mdi mdi-brain"
-      ></i>
-      Sentiment{% endif %}
+
+<!-- ═══════════════════════════════════════════
+     AI INTELLIGENCE PANEL
+════════════════════════════════════════════ -->
+<div class="kpi-section-label rv"><i class="mdi mdi-brain"></i> AI Intelligence Engine</div>
+
+<div class="ai-panel rv" id="ai-panel">
+  <div class="ai-panel-header">
+    <div class="ai-header-left">
+      <div class="ai-brain-icon"><i class="mdi mdi-brain"></i></div>
+      <div>
+        <div class="ai-panel-title">Strategic AI Analysis</div>
+        <div class="ai-panel-sub">Powered by OpenRouter · {{ OPENROUTER_MODEL|default:"mistralai/mistral-7b-instruct" }}</div>
+      </div>
     </div>
-    <h3>{{ report.title }}</h3>
-    <p>{{ report.description|truncatechars:120 }}</p>
-    {% if report.insights %}
-    <div class="insight-box">
-      <strong
-        style="
-          font-size: 10px;
-          text-transform: uppercase;
-          letter-spacing: 0.06em;
-          color: var(--acc);
-          font-family: &quot;Barlow Condensed&quot;, sans-serif;
-        "
-        ><i class="mdi mdi-lightbulb-outline"></i> Key Insight</strong
-      ><br />{{ report.insights|truncatechars:180 }}
+    <div style="display:flex;align-items:center;gap:10px;">
+      {% if ai_available %}
+        <span class="ai-gen-tag">Generated {{ generated_at|date:"M d, Y H:i" }}</span>
+        <a href="{% url 'reports' %}" class="ai-refresh-btn"><i class="mdi mdi-refresh"></i> Refresh</a>
+      {% endif %}
     </div>
+  </div>
+
+  <div class="ai-panel-body">
+    {% if ai_available %}
+      {% if ai_summary %}
+        <!-- Summary -->
+        <div class="ai-summary-box">
+          <strong style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--acc);font-family:'Barlow Condensed',sans-serif;display:block;margin-bottom:6px;"><i class="mdi mdi-lightbulb-outline"></i> Executive Summary</strong>
+          {{ ai_summary }}
+        </div>
+
+        <!-- 3-col insight blocks -->
+        <div class="ai-cols">
+          {% if ai_risks %}
+          <div class="ai-block">
+            <div class="ai-block-heading risk-h"><i class="mdi mdi-shield-alert-outline"></i> Key Risks</div>
+            <ul class="ai-list risk-list">
+              {% for r in ai_risks %}<li>{{ r }}</li>{% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+
+          {% if ai_opportunities %}
+          <div class="ai-block">
+            <div class="ai-block-heading opp-h"><i class="mdi mdi-trending-up"></i> Opportunities</div>
+            <ul class="ai-list opp-list">
+              {% for o in ai_opportunities %}<li>{{ o }}</li>{% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+
+          {% if ai_actions %}
+          <div class="ai-block">
+            <div class="ai-block-heading act-h"><i class="mdi mdi-checkbox-marked-circle-outline"></i> Recommended Actions</div>
+            <ul class="ai-list act-list">
+              {% for a in ai_actions %}<li>{{ a }}</li>{% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+        </div>
+
+      {% else %}
+        <div class="ai-unavailable">
+          <i class="mdi mdi-cloud-off-outline"></i>
+          <p>AI analysis is temporarily unavailable. The model returned an empty response.<br>Try refreshing the page.</p>
+        </div>
+      {% endif %}
+
+    {% else %}
+      <!-- No API key configured -->
+      <div class="ai-unavailable">
+        <i class="mdi mdi-key-outline"></i>
+        <p>OpenRouter API key not configured.<br>
+        Add <code>OPENROUTER_API_KEY = "sk-or-..."</code> to your <code>settings.py</code> to enable AI insights.</p>
+      </div>
     {% endif %}
-    <div class="confidence">
-      <i class="mdi mdi-gauge-full" style="color: var(--success)"></i
-      >Confidence: <strong>{{ report.confidence_level|floatformat:0 }}%</strong
-      ><span style="margin-left: auto; font-size: 10px"
-        >{{ report.created_at|date:"M d, Y" }}</span
-      >
-    </div>
-    <i class="mdi mdi-file-chart report-bg-icon"></i>
-  </div>
-  {% endfor %}
-</div>
-{% else %}
-<div class="kpi-card rv" style="margin-bottom: 1.5rem">
-  <div class="kpi-card-body" style="text-align: center; padding: 3rem">
-    <i
-      class="mdi mdi-brain"
-      style="
-        font-size: 48px;
-        color: var(--line2);
-        display: block;
-        margin-bottom: 12px;
-      "
-    ></i>
-    <h3
-      style="
-        color: var(--t2);
-        font-size: 16px;
-        font-family: &quot;Barlow Condensed&quot;, sans-serif;
-        font-weight: 800;
-        text-transform: uppercase;
-        margin-bottom: 6px;
-      "
-    >
-      No AI Reports Generated Yet
-    </h3>
-    <p style="color: var(--t2); font-size: 13px">
-      Decision reports will appear here once the AI analysis engine processes
-      your data.
-    </p>
   </div>
 </div>
-{% endif %}
 
-<div class="kpi-section-label">
-  <i class="mdi mdi-podium"></i> Top Performing Suppliers
-</div>
-<div class="kpi-card rv" style="margin-bottom: 1.5rem">
+
+
+<!-- ── Top Performers ── -->
+<div class="kpi-section-label"><i class="mdi mdi-podium"></i> Top Performing Suppliers</div>
+<div class="kpi-card rv" style="margin-bottom:1.5rem">
   <div class="kpi-card-header">
-    <span class="kpi-card-title"
-      ><i
-        class="mdi mdi-trophy-outline"
-        style="color: var(--warning); margin-right: 6px"
-      ></i
-      >Supplier Performance Rankings</span
-    ><a
-      href="{% url 'supplierdashboard' %}"
-      class="kpi-btn kpi-btn-outline kpi-btn-sm"
-      >Full Dashboard</a
-    >
+    <span class="kpi-card-title"><i class="mdi mdi-trophy-outline" style="color:var(--warning);margin-right:6px"></i>Supplier Performance Rankings</span>
+    <a href="{% url 'supplierdashboard' %}" class="kpi-btn kpi-btn-outline kpi-btn-sm">Full Dashboard</a>
   </div>
-  <div class="kpi-card-body" style="padding: 0">
-    <table style="width: 100%; font-size: 13px; border-collapse: collapse">
+  <div class="kpi-card-body" style="padding:0">
+    <table style="width:100%;font-size:13px;border-collapse:collapse">
       <thead>
-        <tr style="background: var(--bg2)">
-          <th
-            style="
-              padding: 9px 16px;
-              font-size: 10px;
-              font-weight: 700;
-              color: var(--t2);
-              text-transform: uppercase;
-              letter-spacing: 0.08em;
-              border-bottom: 1px solid var(--line);
-              font-family: &quot;Barlow Condensed&quot;, sans-serif;
-            "
-          >
-            Rank
-          </th>
-          <th
-            style="
-              padding: 9px 16px;
-              font-size: 10px;
-              font-weight: 700;
-              color: var(--t2);
-              text-transform: uppercase;
-              letter-spacing: 0.08em;
-              border-bottom: 1px solid var(--line);
-              font-family: &quot;Barlow Condensed&quot;, sans-serif;
-            "
-          >
-            Supplier
-          </th>
-          <th
-            style="
-              padding: 9px 16px;
-              text-align: right;
-              font-size: 10px;
-              font-weight: 700;
-              color: var(--t2);
-              text-transform: uppercase;
-              letter-spacing: 0.08em;
-              border-bottom: 1px solid var(--line);
-              font-family: &quot;Barlow Condensed&quot;, sans-serif;
-            "
-          >
-            Reviews
-          </th>
+        <tr style="background:var(--bg2)">
+          <th style="padding:9px 16px;font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--line);font-family:'Barlow Condensed',sans-serif;">Rank</th>
+          <th style="padding:9px 16px;font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--line);font-family:'Barlow Condensed',sans-serif;">Supplier</th>
+          <th style="padding:9px 16px;text-align:right;font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--line);font-family:'Barlow Condensed',sans-serif;">Reviews</th>
         </tr>
       </thead>
       <tbody>
         {% for supplier in top_performers %}
-        <tr style="border-bottom: 1px solid var(--line)">
-          <td style="padding: 11px 16px">
-            <div
-              style="width:26px;height:26px;border-radius:6px;background:{% if forloop.counter == 1 %}var(--accL){% elif forloop.counter == 2 %}var(--bg3){% elif forloop.counter == 3 %}rgba(232,93,4,.1){% else %}var(--dim2){% endif %};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;font-family:'Barlow Condensed',sans-serif;color:{% if forloop.counter <= 3 %}var(--acc){% else %}var(--t2){% endif %};"
-            >
-              #{{ forloop.counter }}
-            </div>
+        <tr style="border-bottom:1px solid var(--line)">
+          <td style="padding:11px 16px">
+            <div style="width:26px;height:26px;border-radius:6px;background:{% if forloop.counter == 1 %}var(--accL){% elif forloop.counter == 2 %}var(--bg3){% elif forloop.counter == 3 %}rgba(232,93,4,.1){% else %}var(--dim2){% endif %};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;font-family:'Barlow Condensed',sans-serif;color:{% if forloop.counter <= 3 %}var(--acc){% else %}var(--t2){% endif %};">#{{ forloop.counter }}</div>
           </td>
-          <td
-            style="
-              padding: 11px 16px;
-              font-weight: 700;
-              font-family: &quot;Barlow Condensed&quot;, sans-serif;
-              font-size: 15px;
-            "
-          >
-            {{ supplier.name }}
-          </td>
-          <td
-            style="
-              padding: 11px 16px;
-              text-align: right;
-              font-weight: 800;
-              font-family: &quot;Barlow Condensed&quot;, sans-serif;
-              font-size: 15px;
-              color: var(--acc);
-            "
-          >
-            {{ supplier.review_count }}
-          </td>
+          <td style="padding:11px 16px;font-weight:700;font-family:'Barlow Condensed',sans-serif;font-size:15px;">{{ supplier.name }}</td>
+          <td style="padding:11px 16px;text-align:right;font-weight:800;font-family:'Barlow Condensed',sans-serif;font-size:15px;color:var(--acc);">{{ supplier.review_count }}</td>
         </tr>
         {% empty %}
-        <tr>
-          <td
-            colspan="3"
-            style="padding: 2rem; text-align: center; color: var(--t2)"
-          >
-            No supplier data available yet.
-          </td>
-        </tr>
+        <tr><td colspan="3" style="padding:2rem;text-align:center;color:var(--t2)">No supplier data available yet.</td></tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 </div>
 
-<div class="kpi-section-label">
-  <i class="mdi mdi-lightbulb-outline"></i> Recommended Actions
-</div>
-<div class="kpi-grid-2" style="gap: 1rem; margin-bottom: 1.5rem">
+<!-- ── Recommended Actions ── -->
+<div class="kpi-section-label"><i class="mdi mdi-lightbulb-outline"></i> Recommended Actions</div>
+<div class="kpi-grid-2" style="gap:1rem;margin-bottom:1.5rem">
   <div class="kpi-card rv">
     <div class="kpi-card-header">
-      <span class="kpi-card-title" style="color: var(--success)"
-        ><i class="mdi mdi-check-circle-outline" style="margin-right: 6px"></i
-        >Immediate Actions</span
-      >
+      <span class="kpi-card-title" style="color:var(--success)"><i class="mdi mdi-check-circle-outline" style="margin-right:6px"></i>Immediate Actions</span>
     </div>
     <div class="kpi-card-body">
-      <div class="action-item">
-        <div class="action-bullet">1</div>
-        <div>
-          Review suppliers flagged with <strong>Risk Index &gt; 70</strong> and
-          initiate performance improvement plans.
-        </div>
-      </div>
-      <div class="action-item">
-        <div class="action-bullet">2</div>
-        <div>
-          Restock <strong>low inventory items</strong> before they breach
-          minimum threshold levels.
-        </div>
-      </div>
-      <div class="action-item">
-        <div class="action-bullet">3</div>
-        <div>
-          Resolve all <strong>open complaints</strong> logged against active
-          suppliers within 48 hours.
-        </div>
-      </div>
+      <div class="action-item"><div class="action-bullet">1</div><div>Review suppliers flagged with <strong>Risk Index &gt; 70</strong> and initiate performance improvement plans.</div></div>
+      <div class="action-item"><div class="action-bullet">2</div><div>Restock <strong>low inventory items</strong> before they breach minimum threshold levels.</div></div>
+      <div class="action-item"><div class="action-bullet">3</div><div>Resolve all <strong>open complaints</strong> logged against active suppliers within 48 hours.</div></div>
     </div>
   </div>
   <div class="kpi-card rv d2">
     <div class="kpi-card-header">
-      <span class="kpi-card-title" style="color: var(--acc)"
-        ><i class="mdi mdi-calendar-outline" style="margin-right: 6px"></i
-        >Strategic Recommendations</span
-      >
+      <span class="kpi-card-title" style="color:var(--acc)"><i class="mdi mdi-calendar-outline" style="margin-right:6px"></i>Strategic Recommendations</span>
     </div>
     <div class="kpi-card-body">
-      <div class="action-item">
-        <div class="action-bullet">1</div>
-        <div>
-          Negotiate better terms with suppliers rated
-          <strong>Excellent</strong> to incentivize continued performance.
-        </div>
-      </div>
-      <div class="action-item">
-        <div class="action-bullet">2</div>
-        <div>
-          Expand supplier base in <strong>high-risk categories</strong> to
-          reduce dependency risk.
-        </div>
-      </div>
-      <div class="action-item">
-        <div class="action-bullet">3</div>
-        <div>
-          Leverage positive <strong>customer sentiment</strong> data for
-          marketing and brand positioning.
-        </div>
-      </div>
+      <div class="action-item"><div class="action-bullet">1</div><div>Negotiate better terms with suppliers rated <strong>Excellent</strong> to incentivize continued performance.</div></div>
+      <div class="action-item"><div class="action-bullet">2</div><div>Expand supplier base in <strong>high-risk categories</strong> to reduce dependency risk.</div></div>
+      <div class="action-item"><div class="action-bullet">3</div><div>Leverage positive <strong>customer sentiment</strong> data for marketing and brand positioning.</div></div>
     </div>
   </div>
 </div>
 
+<!-- ── All Decision Reports table ── -->
 {% if decision_reports %}
-<div class="kpi-card rv" style="margin-bottom: 1.5rem">
+<div class="kpi-card rv" style="margin-bottom:1.5rem">
   <div class="kpi-card-header">
-    <span class="kpi-card-title"
-      ><i class="mdi mdi-table" style="margin-right: 6px; color: var(--acc)"></i
-      >All Decision Reports</span
-    >
+    <span class="kpi-card-title"><i class="mdi mdi-table" style="margin-right:6px;color:var(--acc)"></i>All Decision Reports</span>
   </div>
   <div class="kpi-card-body">
     <div class="kpi-table-wrap">
       <table id="reportsTable" class="table">
         <thead>
           <tr>
-            <th>Type</th>
-            <th>Title</th>
-            <th>Description</th>
-            <th>Confidence</th>
-            <th>Generated By</th>
-            <th>Date</th>
+            <th>Type</th><th>Title</th><th>Description</th>
+            <th>Confidence</th><th>Generated By</th><th>Date</th>
           </tr>
         </thead>
         <tbody>
           {% for r in decision_reports %}
           <tr>
+            <td><span class="kpi-badge {% if r.report_type == 'risk' %}danger{% elif r.report_type == 'performance' %}success{% elif r.report_type == 'inventory' %}warning{% else %}info{% endif %}">{{ r.report_type|title }}</span></td>
+            <td style="font-weight:600;font-family:'Barlow Condensed',sans-serif;font-size:14px;">{{ r.title }}</td>
+            <td style="color:var(--t2);font-size:12px">{{ r.description|truncatechars:60 }}</td>
             <td>
-              <span
-                class="kpi-badge {% if r.report_type == 'risk' %}danger{% elif r.report_type == 'performance' %}success{% elif r.report_type == 'inventory' %}warning{% else %}info{% endif %}"
-                >{{ r.report_type|title }}</span
-              >
-            </td>
-            <td
-              style="
-                font-weight: 600;
-                font-family: &quot;Barlow Condensed&quot;, sans-serif;
-                font-size: 14px;
-              "
-            >
-              {{ r.title }}
-            </td>
-            <td style="color: var(--t2); font-size: 12px">
-              {{ r.description|truncatechars:60 }}
-            </td>
-            <td>
-              <div style="display: flex; align-items: center; gap: 6px">
-                <span
-                  style="
-                    font-weight: 700;
-                    font-family: &quot;Barlow Condensed&quot;, sans-serif;
-                  "
-                  >{{ r.confidence_level|floatformat:0 }}%</span
-                >
-                <div class="kpi-progress" style="width: 50px">
-                  <div
-                    class="kpi-progress-bar"
-                    style="width:{{ r.confidence_level|floatformat:0 }}%;background:{% if r.confidence_level >= 80 %}var(--success){% elif r.confidence_level >= 60 %}var(--warning){% else %}var(--danger){% endif %};"
-                  ></div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <span style="font-weight:700;font-family:'Barlow Condensed',sans-serif">{{ r.confidence_level|floatformat:0 }}%</span>
+                <div class="kpi-progress" style="width:50px">
+                  <div class="kpi-progress-bar" style="width:{{ r.confidence_level|floatformat:0 }}%;background:{% if r.confidence_level >= 80 %}var(--success){% elif r.confidence_level >= 60 %}var(--warning){% else %}var(--danger){% endif %};"></div>
                 </div>
               </div>
             </td>
-            <td style="color: var(--t2)">{{ r.generated_by }}</td>
-            <td style="color: var(--t2)">{{ r.created_at|date:"M d, Y" }}</td>
+            <td style="color:var(--t2)">{{ r.generated_by }}</td>
+            <td style="color:var(--t2)">{{ r.created_at|date:"M d, Y" }}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -494,10 +329,13 @@ benchmarks and strategic insights{% endblock %} {% block extra_css %}
     </div>
   </div>
 </div>
-{% endif %} {% endblock %} {% block extra_js %}
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
 <script>
-  $(document).ready(function () {
-    if ($("#reportsTable").length) kpiTable("#reportsTable");
+  $(document).ready(function(){
+    if($("#reportsTable").length) kpiTable("#reportsTable");
   });
 </script>
 {% endblock %}

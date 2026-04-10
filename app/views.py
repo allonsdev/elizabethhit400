@@ -61,11 +61,11 @@ from django.db.models import Sum, Count, Avg, F, ExpressionWrapper, DecimalField
 from django.db.models.functions import TruncMonth
 from .models import InventoryItem, Delivery
 
-OPENROUTER_API_KEY = getattr(settings, "OPENROUTER_API_KEY", "")
+OPENROUTER_API_KEY = getattr(settings, "OPENROUTER_API_KEY","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")
 OPENROUTER_URL     = "https://openrouter.ai/api/v1/chat/completions"
-OPENROUTER_MODEL   = getattr(settings, "OPENROUTER_MODEL", "mistralai/mistral-7b-instruct")
+OPENROUTER_MODEL   = getattr(settings, "OPENROUTER_MODEL", "openai/gpt-5.2")
 
-
+import requests
 
 
 def admin_dashboard(request):
@@ -963,8 +963,28 @@ def store_inventory(request):
 
 # Report & decision recommendations page
 
+
+
+import re
+
+def extract_json(text):
+    try:
+        # remove markdown code blocks safely
+        text = re.sub(r"^```json\s*", "", text.strip())
+        text = re.sub(r"^```", "", text)
+        text = re.sub(r"```$", "", text)
+
+        return json.loads(text)
+    except:
+        return None
+    
+    
 def call_openrouter(system_prompt: str, user_prompt: str, max_tokens: int = 900) -> str:
     """Call OpenRouter and return the assistant text, or an empty string on failure."""
+    
+    
+    print(system_prompt)
+    print(OPENROUTER_API_KEY)
     if not OPENROUTER_API_KEY:
         return ""
     try:
@@ -988,9 +1008,9 @@ def call_openrouter(system_prompt: str, user_prompt: str, max_tokens: int = 900)
         )
         resp.raise_for_status()
         return resp.json()["choices"][0]["message"]["content"].strip()
-    except Exception:
+    except Exception as e:
+        print("OPENROUTER ERROR:", str(e))
         return ""
- 
  
 def build_data_snapshot() -> dict:
     """Aggregate key metrics from the database into a single dict for the AI prompt."""
@@ -1055,43 +1075,91 @@ def build_data_snapshot() -> dict:
         "low_stock_items": low_stock_count,
         "top_suppliers_by_reviews": top_suppliers,
     }
- 
- 
+import json
+import re
+
 def get_ai_insights(snapshot: dict) -> dict:
     """
-    Ask the AI for four structured insight blocks.
-    Returns a dict with keys: summary, risks, opportunities, actions.
-    Falls back to empty strings when OpenRouter is unavailable.
+    Ask the AI for structured insight blocks.
+    Returns: summary, risks, opportunities, actions
     """
+
     SYSTEM = (
-        "You are an expert supply-chain and restaurant operations analyst. "
-        "Respond ONLY with a JSON object — no markdown, no preamble. "
-        "Keys: summary (2 sentences), risks (list of 3 strings), "
-        "opportunities (list of 3 strings), actions (list of 4 strings). "
-        "Be specific and reference the numbers provided."
+        "You are an expert supply-chain and restaurant operations analyst.\n"
+        "Return ONLY valid JSON. No markdown, no explanations, no code blocks.\n\n"
+        "Format EXACTLY like this:\n"
+        "{\n"
+        '  "summary": "text",\n'
+        '  "risks": ["text","text","text"],\n'
+        '  "opportunities": ["text","text","text"],\n'
+        '  "actions": ["text","text","text","text"]\n'
+        "}\n"
     )
+
     USER = (
-        f"Here is today's KPI snapshot for a fast-food supply chain operation:\n"
+        "Here is today's KPI snapshot:\n"
         f"{json.dumps(snapshot, indent=2)}\n\n"
         "Provide a concise strategic analysis."
     )
+
     raw = call_openrouter(SYSTEM, USER, max_tokens=700)
+
+    # 🔍 Debug (VERY IMPORTANT)
+    print("\n=== RAW AI RESPONSE ===\n", raw)
+
     if not raw:
-        return {"summary": "", "risks": [], "opportunities": [], "actions": []}
+        return {
+            "summary": "",
+            "risks": [],
+            "opportunities": [],
+            "actions": []
+        }
+
     try:
-        # Strip any accidental markdown fences
-        clean = raw.strip().lstrip("```json").lstrip("```").rstrip("```").strip()
-        return json.loads(clean)
-    except (json.JSONDecodeError, KeyError):
-        return {"summary": raw, "risks": [], "opportunities": [], "actions": []}
- 
+        # ✅ STEP 1: Remove markdown safely
+        text = raw.strip()
+        text = re.sub(r"^```json\s*", "", text)
+        text = re.sub(r"^```", "", text)
+        text = re.sub(r"```$", "", text)
+
+        # ✅ STEP 2: Extract JSON object ONLY
+        match = re.search(r"\{.*\}", text, re.DOTALL)
+        if not match:
+            raise ValueError("No JSON object found")
+
+        json_str = match.group(0)
+
+        # ✅ STEP 3: Parse JSON
+        parsed = json.loads(json_str)
+
+        # ✅ STEP 4: Validate structure
+        return {
+            "summary": parsed.get("summary", ""),
+            "risks": parsed.get("risks", []),
+            "opportunities": parsed.get("opportunities", []),
+            "actions": parsed.get("actions", []),
+        }
+
+    except Exception as e:
+        print("❌ PARSE ERROR:", str(e))
+
+        # 🚨 Fallback (cleaner than before)
+        return {
+            "summary": "AI response could not be structured properly.",
+            "risks": [],
+            "opportunities": [],
+            "actions": [],
+        }
  
 # ─────────────────────────────────────────────
 # Main view
 # ─────────────────────────────────────────────
 def report_and_recommendations(request):
     snapshot = build_data_snapshot()
+    print(snapshot)
     ai       = get_ai_insights(snapshot)
+    
+    print(ai)
  
     avg_supplier_rating = Review.objects.aggregate(
         avg=Avg("overall_weighted_score")

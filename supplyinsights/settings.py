@@ -139,7 +139,7 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
 
-OPENROUTER_API_KEY = "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"
+OPENROUTER_API_KEY = "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"
 OPENROUTER_URL     = "https://openrouter.ai/api/v1/chat/completions"
 OPENROUTER_MODEL   = "openai/gpt-5.2"
 

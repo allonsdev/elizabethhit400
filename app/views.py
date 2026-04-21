@@ -476,31 +476,49 @@ def customer_review_view(request):
 # SUPPLIER REGISTRATION
 # ─────────────────────────────────────────────
 
+from django.db import IntegrityError
+
 def supplier_register(request):
     print("allons")
     if request.method == "POST":
-        name          = request.POST.get("name")
-        print(name)
-        company_name  = request.POST.get("company_name")
-        supplier_code = request.POST.get("supplier_code")
+        name           = request.POST.get("name")
+        company_name   = request.POST.get("company_name")
+        supplier_code  = request.POST.get("supplier_code")
         contact_person = request.POST.get("contact_person")
-        phone         = request.POST.get("phone")
-        email         = request.POST.get("email")
-        location      = request.POST.get("location")
-        is_active     = request.POST.get("is_active") == "on"
-        
-        print(supplier_code)
+        phone          = request.POST.get("phone")
+        email          = request.POST.get("email")
+        location       = request.POST.get("location")
+        is_active      = request.POST.get("is_active") == "on"
+
         if not name or not supplier_code:
             messages.error(request, "Name and Supplier Code are required!")
             return redirect("register")
 
-        supplier = Supplier.objects.create(
-            name=name, company_name=company_name,
-            supplier_code=supplier_code, contact_person=contact_person,
-            phone=phone, email=email, location=location,
-            is_active=is_active, created_at=timezone.now(),
-        )
-        print(supplier)
+        try:
+            supplier = Supplier.objects.create(
+                name=name, company_name=company_name,
+                supplier_code=supplier_code, contact_person=contact_person,
+                phone=phone, email=email, location=location,
+                is_active=is_active, created_at=timezone.now(),
+            )
+
+        except IntegrityError as e:
+            error_msg = str(e).lower()
+            if "supplier_code" in error_msg:
+                messages.error(request, f"Supplier code '{supplier_code}' is already in use.")
+            elif "email" in error_msg:
+                messages.error(request, f"A supplier with email '{email}' already exists.")
+            elif "phone" in error_msg:
+                messages.error(request, f"A supplier with phone '{phone}' already exists.")
+            elif "unique" in error_msg or "duplicate" in error_msg:
+                messages.error(request, "A supplier with those details already exists.")
+            else:
+                messages.error(request, "Could not register supplier due to a database error.")
+            return redirect("register")
+
+        except Exception as e:
+            messages.error(request, f"An unexpected error occurred: {e}")
+            return redirect("register")
 
         # ── EMAIL NOTIFICATION ──────────────────────────────────────
         admin_email = getattr(settings, "ADMIN_NOTIFICATION_EMAIL", settings.DEFAULT_FROM_EMAIL)
@@ -519,7 +537,6 @@ def supplier_register(request):
         return redirect("register")
 
     return render(request, "supplierregistration.html", {"page_title": "Supplier Registration"})
-
 
 # ─────────────────────────────────────────────
 # DELIVERY  (FIX: lookup by order_number to auto-fill)

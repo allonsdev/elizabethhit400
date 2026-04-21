@@ -73,6 +73,9 @@
       <div><div class="kpi-card-title">Supplier Details</div></div>
     </div>
     <div class="kpi-card-body">
+      {% for message in messages %}
+  <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+{% endfor %}
 
       <form method="POST" action="{% url 'register' %}" id="supplierForm" novalidate>
         {% csrf_token %}

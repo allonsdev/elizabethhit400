@@ -481,9 +481,7 @@ class MarketTrend(models.Model):
         return self.trend_title
 
 
-# ---------------------------------------
-# Market Indicator
-# ---------------------------------------
+
 class MarketIndicator(models.Model):
     trend = models.ForeignKey(
         MarketTrend, on_delete=models.CASCADE, related_name="indicators"
@@ -502,6 +500,65 @@ class MarketIndicator(models.Model):
     def __str__(self):
         return f"{self.indicator_name} - {self.recorded_date}"
 
+
+
+class Order(models.Model):
+    ORDER_STATUS = (
+        ('PENDING',    'Pending'),
+        ('CONFIRMED',  'Confirmed'),
+        ('DISPATCHED', 'Dispatched'),
+        ('DELIVERED',  'Delivered'),
+        ('CANCELLED',  'Cancelled'),
+    )
+ 
+    # Auto-generated order number: ORD-YYYY-XXXXX
+    order_number = models.CharField(max_length=30, unique=True, editable=False)
+ 
+    supplier     = models.ForeignKey(Supplier, on_delete=models.CASCADE, related_name="orders")
+    product_name = models.CharField(max_length=255)
+    product_category = models.CharField(max_length=100)
+    sku          = models.CharField(max_length=100, blank=True, null=True)
+ 
+    quantity_ordered = models.PositiveIntegerField()
+    unit_cost        = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_cost       = models.DecimalField(max_digits=14, decimal_places=2, default=0)
+ 
+    expected_delivery_date = models.DateField()
+    status         = models.CharField(max_length=20, choices=ORDER_STATUS, default='PENDING')
+    notes          = models.TextField(blank=True, null=True)
+ 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+ 
+    class Meta:
+        verbose_name = "Order"
+        verbose_name_plural = "Orders"
+        ordering = ["-created_at"]
+ 
+    def save(self, *args, **kwargs):
+        # Auto-generate order number on first save
+        if not self.order_number:
+            year = timezone.now().year
+            last = Order.objects.filter(
+                order_number__startswith=f"ORD-{year}-"
+            ).order_by("-order_number").first()
+ 
+            if last:
+                try:
+                    seq = int(last.order_number.split("-")[-1]) + 1
+                except (ValueError, IndexError):
+                    seq = 1
+            else:
+                seq = 1
+ 
+            self.order_number = f"ORD-{year}-{seq:05d}"
+ 
+        # Auto-calculate total
+        self.total_cost = self.quantity_ordered * self.unit_cost
+        super().save(*args, **kwargs)
+ 
+    def __str__(self):
+        return f"{self.order_number} — {self.supplier.name}"
 
 # ---------------------------------------
 # Scraped Market Source
